@@ -12,13 +12,7 @@ import numpy as np
 import torch
 from torchvision import datasets, transforms
 
-dataset = datasets.MNIST("mnist",
-    train=False,
-    download=True,
-    transform=transforms.Compose(
-        [transforms.ToTensor()]
-    ),
-)
+from image_transforms import RandomNoise
 
 # Web App:
 app = Flask(__name__)
@@ -34,6 +28,17 @@ def styles():
 
 class Mnist(Resource):
     def get(self, batch, noise):
+        dataset = datasets.MNIST("mnist",
+            train=False,
+            download=True,
+            transform=transforms.Compose(
+                [
+                    transforms.ToTensor(),
+                    RandomNoise(noise / 100., whiteValue=0.1307 + 2*0.3081),
+                    transforms.Normalize((0.1307,), (0.3081,))
+                ]
+            ),
+        )
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch, shuffle=True)
         batch_idx, (example_data, example_targets) = next(enumerate(dataloader))
 
