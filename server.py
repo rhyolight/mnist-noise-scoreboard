@@ -6,51 +6,37 @@ Usage::
 """
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
+from flask import Flask, request, send_from_directory
 
 import numpy as np
 import torch
 from torchvision import datasets, transforms
 
-
-def createValidationDataSampler(dataset, ratio):
-  """
-  Create `torch.utils.data.Sampler`s used to split the dataset into 2 ramdom
-  sampled subsets. The first should used for training and the second for
-  validation.
-
-  :param dataset: A valid torch.utils.data.Dataset (i.e. torchvision.datasets.MNIST)
-  :param ratio: The percentage of the dataset to be used for training. The
-                remaining (1-ratio)% will be used for validation
-  :return: tuple with 2 torch.utils.data.Sampler. (train, validate)
-  """
-  indices = np.random.permutation(len(dataset))
-  training_count = int(len(indices) * ratio)
-  train = torch.utils.data.SubsetRandomSampler(indices=indices[:training_count])
-  validate = torch.utils.data.SubsetRandomSampler(indices=indices[training_count:])
-  return (train, validate)
-
-
 dataset = datasets.MNIST("mnist",
     train=False,
     download=True,
     transform=transforms.Compose(
-        [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+        [transforms.ToTensor()]
     ),
 )
-
 
 # Web App:
 app = Flask(__name__)
 api = Api(app)
 
+@app.route('/')
+def index():
+    return send_from_directory('static', 'index.html')
+
+@app.route('/css/styles.css')
+def styles():
+    return send_from_directory('static/css', 'styles.css')
+
 class Mnist(Resource):
     def get(self, batch, noise):
-        print("batch: {} noise: {}".format(batch, noise))
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch, shuffle=True)
-        examples = enumerate(dataloader)
-        batch_idx, (example_data, example_targets) = next(examples)
-        print(example_data.shape)
-        print(example_targets)
+        batch_idx, (example_data, example_targets) = next(enumerate(dataloader))
+
         response = {
             "data": example_data.data.cpu().numpy().tolist(),
             "targets": example_targets.data.cpu().numpy().tolist(),
@@ -58,4 +44,4 @@ class Mnist(Resource):
         return response, 200
 
 api.add_resource(Mnist, "/_mnist/<int:batch>/<int:noise>")
-app.run(debug=True)
+app.run(debug=False)

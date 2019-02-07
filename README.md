@@ -1,3 +1,9 @@
-Serves MNIST data over REST.
+## Work in Progress (like everything else)
 
-GET /_mnist/<batch-size>/<noise>
+Install:
+
+    pip install -r requirements.txt
+
+Start server:
+
+    python server.py
