@@ -1,28 +1,91 @@
 <!doctype html>
-
 <html lang="en">
 <head>
   <meta charset="utf-8">
 
-  <title>MNIST Noise Scoreboard</title>
   <meta name="description" content="The HTML5 Herald">
   <meta name="author" content="SitePoint">
 
-  <link rel="stylesheet" href="css/styles.css?v=1.0">
 
 </head>
 
 <body>
 
-  <script src="/static/lib/jquery/dist/jquery.min.js"></script>
-  <script src="/static/lib/mnist/dist/mnist.js"></script>
-
-  <script src="/static/js/index.js"></script>
-
-  <h1>MNIST Noise Scoreboard</h1>
-
-  <div id="scoreboard">
-    <div id="canvas-bag"></div>
-  </div>
 </body>
+</html>
+
+
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet"
+          href="/static/lib/bootstrap/dist/css/bootstrap.min.css"
+          integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="css/styles.css?v=1.0">
+
+    <title>MNIST Noise Scoreboard</title>
+
+  </head>
+  <body>
+
+    <h1>Noisey MNIST SparseNet Demo</h1>
+
+    <div id="scoreboard" class="container">
+
+      <div class="row">
+
+        <div class="col-8">
+          <div id="canvas-bag"></div>
+          <div class="sliders">
+            <input type="range" id="noise" name="noise" min="0" max="100">
+            <label for="noise"><span id="noise-label"></span>% Noise</label>
+          </div>
+        </div>
+
+        <div class="col-4">
+
+          <div class="container">
+
+            <div class="row">
+              <div class="col">
+                <h2>Dense CNN</h2>
+                <h3 id="denseCNN1-score"></h3>
+                <div class="progress">
+                  <div id="denseCNN1-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col">
+                <h2>SparseNet</h2>
+                <h3 id="sparseCNN1-score"></h3>
+                <div class="progress">
+                  <div id="sparseCNN1-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <script src="/static/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
+    <script src="/static/lib/bootstrap/dist/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+    <script src="/static/lib/mnist/dist/mnist.js"></script>
+
+    <script src="/static/js/index.js"></script>
+
+  </body>
 </html>

@@ -4,15 +4,40 @@
 Usage::
     ./server.py [<port>]
 """
+# from __future__ import (absolute_import, division,
+#                         print_function, unicode_literals)
+
 from flask import Flask
 from flask_restful import Api, Resource, reqparse
 from flask import Flask, request, send_from_directory
 
 import numpy as np
 import torch
+import torch.nn.functional as F
 from torchvision import datasets, transforms
 
 from image_transforms import RandomNoise
+
+# ML models
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+models = {}
+models['denseCNN1'] = torch.load('models/denseCNN1.pt', map_location=device)
+models['sparseCNN1'] = torch.load('models/sparseCNN1.pt', map_location=device)
+
+def getClassificationResults(data, target):
+    result = {}
+    with torch.no_grad():
+        for name in models:
+            model = models[name]
+            data, target = data.to(device), target.to(device)
+            output = model(data)
+            test_loss = F.nll_loss(output, target, reduction='sum').item()
+            pred = output.max(1, keepdim=True)[1]
+            correct = pred.eq(target.view_as(pred)).sum().item()
+            result[name] = {}
+            result[name]["accuracy"] = float(correct) / len(data)
+            result[name]["classifications"] = pred.cpu().numpy().tolist()
+    return result
 
 # Web App:
 app = Flask(__name__)
@@ -45,8 +70,9 @@ class Mnist(Resource):
         response = {
             "data": example_data.data.cpu().numpy().tolist(),
             "targets": example_targets.data.cpu().numpy().tolist(),
+            "classifications": getClassificationResults(example_data, example_targets),
         }
         return response, 200
 
 api.add_resource(Mnist, "/_mnist/<int:batch>/<int:noise>")
-app.run(debug=False)
+app.run(debug=True)

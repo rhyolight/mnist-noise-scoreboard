@@ -1,3 +1,21 @@
+body {
+  margin: 100px;
+  font-family: Verdana;
+}
+
 canvas {
-  border: solid white 2px;
+  border: none;
+}
+
+#canvas-bag {
+  width: 700px;
+  line-height: 0.1;
+}
+
+div {
+  /* border: solid 1px red; */
+}
+
+.sliders {
+  float: right;
 }
