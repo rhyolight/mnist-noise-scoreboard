@@ -1,6 +1,5 @@
 body {
   margin: 100px;
-  font-family: Verdana;
 }
 
 canvas {
@@ -18,4 +17,9 @@ div {
 
 .sliders {
   float: right;
+}
+
+.spinner-border {
+  position: absolute;
+  padding: 100px;
 }
