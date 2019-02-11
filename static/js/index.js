@@ -2,16 +2,23 @@ $(function() {
 
     // DOM stuff used below
     let $canvasBag = $('#canvas-bag')
+    let $spinner = $('.spinner-border')
+
     let $noiseSlider = $('#noise')
     let $noiseLabel = $('#noise-label')
     let $noiseEnabled = $('#noise-enabled')
-    let $gridSlider = $('#grid-size')
-    let $gridLabel = $('#grid-size-label')
+    let $gridSlider = $('#grid')
+    let $gridLabel = $('#grid-label')
     let $gridEnabled = $('#grid-enabled')
-    let $wipeSlider = $('#wipe-perc')
-    let $wipeLabel = $('#wipe-perc-label')
+    let $wipeSlider = $('#wipe')
+    let $wipeLabel = $('#wipe-label')
     let $wipeEnabled = $('#wipe-enabled')
-    let $spinner = $('.spinner-border')
+    // let $invertSlider = $('#invert')
+    let $invertLabel = $('#invert-label')
+    let $invertEnabled = $('#invert-enabled')
+    let $brightnessSlider = $('#washout')
+    let $brightnessLabel = $('#washout-label')
+    let $brightnessEnabled = $('#washout-enabled')
 
     // last classification results
     let results
@@ -68,6 +75,8 @@ $(function() {
         $noiseLabel.html($noiseSlider.val())
         $gridLabel.html($gridSlider.val())
         $wipeLabel.html($wipeSlider.val())
+        // $invertLabel.html($invertSlider.val())
+        $brightnessLabel.html($brightnessSlider.val())
         let models = Object.keys(resp.classifications)
         resp.data.forEach((digit, i) => {
             let $canvas = $('<canvas>')
@@ -177,17 +186,17 @@ $(function() {
     $noiseSlider.change((evt) => {
         if ($noiseEnabled.is(':checked')) {
             $spinner.show()
-            $.getJSON("/_mnist/" + batch + "/RandomNoise/" + $noiseSlider.val(), renderMnist);
+            $.getJSON("/_mnist/" + batch + "/noise/" + $noiseSlider.val(), renderMnist);
         }
     })
 
     // Handle Grid Size interaction
-    $gridLabel.html(0)
-    $gridSlider.val(0)
+    $gridLabel.html(2)
+    $gridSlider.val(2)
     $gridSlider.change((evt) => {
         if ($gridEnabled.is(':checked')) {
             $spinner.show()
-            $.getJSON("/_mnist/" + batch + "/Grid/" + $gridSlider.val(), renderMnist);
+            $.getJSON("/_mnist/" + batch + "/grid/" + $gridSlider.val(), renderMnist);
         }
     })
 
@@ -197,8 +206,41 @@ $(function() {
     $wipeSlider.change((evt) => {
         if ($wipeEnabled.is(':checked')) {
             $spinner.show()
-            $.getJSON("/_mnist/" + batch + "/Wipe/" + $wipeSlider.val(), renderMnist);
+            $.getJSON("/_mnist/" + batch + "/wipe/" + $wipeSlider.val(), renderMnist);
         }
+    })
+
+    // // Handle invert interaction
+    // $invertLabel.html(0)
+    // $invertSlider.val(0)
+    // $invertSlider.change((evt) => {
+    //     if ($invertEnabled.is(':checked')) {
+    //         $spinner.show()
+    //         $.getJSON("/_mnist/" + batch + "/invert/" + $invertSlider.val(), renderMnist);
+    //     }
+    // })
+
+    // Handle washout interaction
+    $brightnessLabel.html(50)
+    $brightnessSlider.val(50)
+    $brightnessSlider.change((evt) => {
+        if ($brightnessEnabled.is(':checked')) {
+            $spinner.show()
+            $.getJSON("/_mnist/" + batch + "/washout/" + $brightnessSlider.val(), renderMnist);
+        }
+    })
+
+    // Transform Activation
+    $('input[type=radio]').change((evt) => {
+        let $radio = $(evt.currentTarget)
+        let xform = $radio.attr('id').split('-').shift()
+        let $slider = $('#' + xform)
+        $('input[type=radio]').prop('checked', false)
+        $('#' + xform + '-enabled').prop('checked', true)
+        $spinner.show()
+        let val = $slider.val()
+        if (! val) val = 0
+        $.getJSON("/_mnist/" + batch + "/" + xform + "/" + val, renderMnist);
     })
 
     // Handle Model interaction
@@ -210,5 +252,5 @@ $(function() {
     })
 
     // Kick off the first batch
-    $.getJSON("/_mnist/" + batch + "/RandomNoise/" + startingNoise, renderMnist);
+    $.getJSON("/_mnist/" + batch + "/noise/" + startingNoise, renderMnist);
 })

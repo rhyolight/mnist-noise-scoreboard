@@ -16,7 +16,7 @@ import torch
 import torch.nn.functional as F
 from torchvision import datasets, transforms
 
-from image_transforms import RandomNoise, Grid, Wipe
+from image_transforms import RandomNoise, Grid, Wipe, Invert, Washout
 
 # ML models
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -58,12 +58,16 @@ class Mnist(Resource):
         args = parser.parse_args()
 
     def get(self, batch, xform, xformStrength):
-        if xform == "RandomNoise":
+        if xform == "noise":
             imageTransform = RandomNoise(xformStrength / 100.)
-        elif xform == "Grid":
+        elif xform == "grid":
             imageTransform = Grid(size=xformStrength)
-        elif xform == "Wipe":
+        elif xform == "wipe":
             imageTransform = Wipe(percent=xformStrength / 100.)
+        elif xform == "invert":
+            imageTransform = Invert()
+        elif xform == "washout":
+            imageTransform = Washout(level=xformStrength / 100.)
         else:
             imageTransform = transforms.ToTensor
 
