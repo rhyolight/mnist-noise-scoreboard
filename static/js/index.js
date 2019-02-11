@@ -8,6 +8,9 @@ $(function() {
     let $gridSlider = $('#grid-size')
     let $gridLabel = $('#grid-size-label')
     let $gridEnabled = $('#grid-enabled')
+    let $wipeSlider = $('#wipe-perc')
+    let $wipeLabel = $('#wipe-perc-label')
+    let $wipeEnabled = $('#wipe-enabled')
     let $spinner = $('.spinner-border')
 
     // last classification results
@@ -64,6 +67,7 @@ $(function() {
         $canvasBag.html('')
         $noiseLabel.html($noiseSlider.val())
         $gridLabel.html($gridSlider.val())
+        $wipeLabel.html($wipeSlider.val())
         let models = Object.keys(resp.classifications)
         resp.data.forEach((digit, i) => {
             let $canvas = $('<canvas>')
@@ -184,6 +188,16 @@ $(function() {
         if ($gridEnabled.is(':checked')) {
             $spinner.show()
             $.getJSON("/_mnist/" + batch + "/Grid/" + $gridSlider.val(), renderMnist);
+        }
+    })
+
+    // Handle Wipe interaction
+    $wipeLabel.html(0)
+    $wipeSlider.val(0)
+    $wipeSlider.change((evt) => {
+        if ($wipeEnabled.is(':checked')) {
+            $spinner.show()
+            $.getJSON("/_mnist/" + batch + "/Wipe/" + $wipeSlider.val(), renderMnist);
         }
     })
 
