@@ -16,7 +16,7 @@ import torch
 import torch.nn.functional as F
 from torchvision import datasets, transforms
 
-from image_transforms import RandomNoise, Boxes
+from image_transforms import RandomNoise, Grid
 
 # ML models
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -42,6 +42,7 @@ def getClassificationResults(data, target):
 # Web App:
 app = Flask(__name__)
 api = Api(app)
+parser = reqparse.RequestParser()
 
 @app.route('/')
 def index():
@@ -52,9 +53,18 @@ def styles():
     return send_from_directory('static/css', 'styles.css')
 
 class Mnist(Resource):
-    def get(self, batch, noise):
-        # imageTransform = RandomNoise(noise / 100., whiteValue=0.1307 + 2*0.3081)
-        imageTransform = Boxes(size=6)
+
+    def post(self):
+        args = parser.parse_args()
+
+    def get(self, batch, xform, xformStrength):
+        if xform == "RandomNoise":
+            imageTransform = RandomNoise(xformStrength / 100.)
+        elif xform == "Grid":
+            imageTransform = Grid(size=xformStrength)
+        else:
+            imageTransform = transforms.ToTensor
+
         dataset = datasets.MNIST("mnist",
             train=False,
             download=True,
@@ -76,5 +86,5 @@ class Mnist(Resource):
         }
         return response, 200
 
-api.add_resource(Mnist, "/_mnist/<int:batch>/<int:noise>")
+api.add_resource(Mnist, "/_mnist/<int:batch>/<string:xform>/<int:xformStrength>")
 app.run(debug=True)

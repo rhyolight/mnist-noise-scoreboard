@@ -4,6 +4,10 @@ $(function() {
     let $canvasBag = $('#canvas-bag')
     let $noiseSlider = $('#noise')
     let $noiseLabel = $('#noise-label')
+    let $noiseEnabled = $('#noise-enabled')
+    let $gridSlider = $('#grid-size')
+    let $gridLabel = $('#grid-size-label')
+    let $gridEnabled = $('#grid-enabled')
     let $spinner = $('.spinner-border')
 
     // last classification results
@@ -59,6 +63,7 @@ $(function() {
         hideDigitDetail()
         $canvasBag.html('')
         $noiseLabel.html($noiseSlider.val())
+        $gridLabel.html($gridSlider.val())
         let models = Object.keys(resp.classifications)
         resp.data.forEach((digit, i) => {
             let $canvas = $('<canvas>')
@@ -166,8 +171,20 @@ $(function() {
     $noiseLabel.html(startingNoise)
     $noiseSlider.val(startingNoise)
     $noiseSlider.change((evt) => {
-        $spinner.show()
-        $.getJSON("/_mnist/" + batch + "/" + $noiseSlider.val(), renderMnist);
+        if ($noiseEnabled.is(':checked')) {
+            $spinner.show()
+            $.getJSON("/_mnist/" + batch + "/RandomNoise/" + $noiseSlider.val(), renderMnist);
+        }
+    })
+
+    // Handle Grid Size interaction
+    $gridLabel.html(0)
+    $gridSlider.val(0)
+    $gridSlider.change((evt) => {
+        if ($gridEnabled.is(':checked')) {
+            $spinner.show()
+            $.getJSON("/_mnist/" + batch + "/Grid/" + $gridSlider.val(), renderMnist);
+        }
     })
 
     // Handle Model interaction
@@ -179,5 +196,5 @@ $(function() {
     })
 
     // Kick off the first batch
-    $.getJSON("/_mnist/" + batch + "/" + startingNoise, renderMnist);
+    $.getJSON("/_mnist/" + batch + "/RandomNoise/" + startingNoise, renderMnist);
 })

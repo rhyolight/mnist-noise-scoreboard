@@ -55,7 +55,7 @@ class RandomNoise(object):
     return image
 
 
-class Boxes(object):
+class Grid(object):
   """
   An image transform that adds stripes in the image.
   """
