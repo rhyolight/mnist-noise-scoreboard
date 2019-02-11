@@ -15,12 +15,15 @@ $(function() {
     let $wipeEnabled = $('#wipe-enabled')
     let $invertLabel = $('#invert-label')
     let $invertEnabled = $('#invert-enabled')
-    let $brightnessSlider = $('#brightness')
-    let $brightnessLabel = $('#brightness-label')
-    let $brightnessEnabled = $('#brightness-enabled')
+    let $washoutSlider = $('#washout')
+    let $washoutLabel = $('#washout-label')
+    let $washoutEnabled = $('#washout-enabled')
     let $swirlSlider = $('#swirl')
     let $swirlLabel = $('#swirl-label')
     let $swirlEnabled = $('#swirl-enabled')
+    let $rotateSlider = $('#rotate')
+    let $rotateLabel = $('#rotate-label')
+    let $rotateEnabled = $('#rotate-enabled')
 
     // last classification results
     let results
@@ -77,8 +80,9 @@ $(function() {
         $noiseLabel.html($noiseSlider.val())
         $gridLabel.html($gridSlider.val())
         $wipeLabel.html($wipeSlider.val())
-        $brightnessLabel.html($brightnessSlider.val())
+        $washoutLabel.html($washoutSlider.val())
         $swirlLabel.html($swirlSlider.val())
+        $rotateLabel.html($rotateSlider.val())
         let models = Object.keys(resp.classifications)
         resp.data.forEach((digit, i) => {
             let $canvas = $('<canvas>')
@@ -218,22 +222,32 @@ $(function() {
     })
 
     // Handle washout interaction
-    $brightnessLabel.html(50)
-    $brightnessSlider.val(50)
-    $brightnessSlider.change((evt) => {
-        if ($brightnessEnabled.is(':checked')) {
+    $washoutLabel.html(50)
+    $washoutSlider.val(50)
+    $washoutSlider.change((evt) => {
+        if ($washoutEnabled.is(':checked')) {
             $spinner.show()
-            $.getJSON("/_mnist/" + batch + "/washout/" + $brightnessSlider.val(), renderMnist);
+            $.getJSON("/_mnist/" + batch + "/washout/" + $washoutSlider.val(), renderMnist);
         }
     })
 
-    // Handle washout interaction
+    // Handle swirl interaction
     $swirlLabel.html(0)
     $swirlSlider.val(0)
     $swirlSlider.change((evt) => {
         if ($swirlEnabled.is(':checked')) {
             $spinner.show()
             $.getJSON("/_mnist/" + batch + "/swirl/" + $swirlSlider.val(), renderMnist);
+        }
+    })
+
+    // Handle rotate interaction
+    $rotateLabel.html(0)
+    $rotateSlider.val(0)
+    $rotateSlider.change((evt) => {
+        if ($rotateEnabled.is(':checked')) {
+            $spinner.show()
+            $.getJSON("/_mnist/" + batch + "/rotate/" + $rotateSlider.val(), renderMnist);
         }
     })
 

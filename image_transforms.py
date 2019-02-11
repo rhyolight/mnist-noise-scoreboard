@@ -110,3 +110,17 @@ class Swirl(object):
         rotation=0.0,
     )
     return ToTensor()(PIL.Image.fromarray(swirled))
+
+
+class Rotate(object):
+  def __init__(self, degrees=0):
+    self.degrees = degrees
+
+  def __call__(self, image):
+    if self.degrees == 0: return image
+    pil = ToPILImage()(image)
+    rotated = transform.rotate(
+        np.array(pil), angle=self.degrees,
+        center=(14,14),
+    )
+    return ToTensor()(PIL.Image.fromarray(rotated))
