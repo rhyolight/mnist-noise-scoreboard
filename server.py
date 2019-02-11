@@ -16,7 +16,7 @@ import torch
 import torch.nn.functional as F
 from torchvision import datasets, transforms
 
-from image_transforms import RandomNoise, Grid, Wipe, Invert, Washout
+from image_transforms import RandomNoise, Grid, Wipe, Invert, Washout, Swirl
 
 # ML models
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -66,6 +66,8 @@ class Mnist(Resource):
             imageTransform = Wipe(percent=xformStrength / 100.)
         elif xform == "invert":
             imageTransform = Invert()
+        elif xform == "swirl":
+            imageTransform = Swirl(level=xformStrength / 100.)
         elif xform == "washout":
             imageTransform = Washout(level=xformStrength / 100.)
         else:

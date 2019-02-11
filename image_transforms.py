@@ -1,9 +1,10 @@
 import os
 import numpy as np
 from skimage import io, transform
-import torch
+import PIL
 
-from skimage import data
+import torch
+from torchvision.transforms import ToPILImage, ToTensor
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -92,3 +93,20 @@ class Washout(object):
       for y in range(image.shape[2]):
         image.data[0][x][y] = image.data[0][x][y] - self.level
     return image
+
+
+class Swirl(object):
+  def __init__(self, level=0.5):
+    self.level = level
+
+  def __call__(self, image):
+    if self.level == 0: return image
+    pil = ToPILImage()(image)
+    swirled = transform.swirl(
+        np.array(pil),
+        center=(14,14),
+        strength=10.0 * self.level,
+        radius=28,
+        rotation=0.0,
+    )
+    return ToTensor()(PIL.Image.fromarray(swirled))

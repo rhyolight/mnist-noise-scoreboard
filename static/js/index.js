@@ -13,12 +13,14 @@ $(function() {
     let $wipeSlider = $('#wipe')
     let $wipeLabel = $('#wipe-label')
     let $wipeEnabled = $('#wipe-enabled')
-    // let $invertSlider = $('#invert')
     let $invertLabel = $('#invert-label')
     let $invertEnabled = $('#invert-enabled')
-    let $brightnessSlider = $('#washout')
-    let $brightnessLabel = $('#washout-label')
-    let $brightnessEnabled = $('#washout-enabled')
+    let $brightnessSlider = $('#brightness')
+    let $brightnessLabel = $('#brightness-label')
+    let $brightnessEnabled = $('#brightness-enabled')
+    let $swirlSlider = $('#swirl')
+    let $swirlLabel = $('#swirl-label')
+    let $swirlEnabled = $('#swirl-enabled')
 
     // last classification results
     let results
@@ -75,8 +77,8 @@ $(function() {
         $noiseLabel.html($noiseSlider.val())
         $gridLabel.html($gridSlider.val())
         $wipeLabel.html($wipeSlider.val())
-        // $invertLabel.html($invertSlider.val())
         $brightnessLabel.html($brightnessSlider.val())
+        $swirlLabel.html($swirlSlider.val())
         let models = Object.keys(resp.classifications)
         resp.data.forEach((digit, i) => {
             let $canvas = $('<canvas>')
@@ -124,6 +126,11 @@ $(function() {
         let smallCanvas = $c[0]
         $d.css({top: topLeft.top, left: topLeft.left})
         $d.append($digitCanvas)
+        let $detail = $('<ul>')
+        $detail.append('<li>Target: ' + results.targets[i] + '</li>')
+        $detail.append('<li>Dense CNN: ' + results.classifications.denseCNN1.classifications[i])
+        $detail.append('<li>Sparse CNN: ' + results.classifications.sparseCNN1.classifications[i])
+        $d.append($detail)
         let digitCanvas = $digitCanvas.get(0)
         let largeContext = digitCanvas.getContext('2d')
         var largeDigit = new Image();
@@ -210,16 +217,6 @@ $(function() {
         }
     })
 
-    // // Handle invert interaction
-    // $invertLabel.html(0)
-    // $invertSlider.val(0)
-    // $invertSlider.change((evt) => {
-    //     if ($invertEnabled.is(':checked')) {
-    //         $spinner.show()
-    //         $.getJSON("/_mnist/" + batch + "/invert/" + $invertSlider.val(), renderMnist);
-    //     }
-    // })
-
     // Handle washout interaction
     $brightnessLabel.html(50)
     $brightnessSlider.val(50)
@@ -227,6 +224,16 @@ $(function() {
         if ($brightnessEnabled.is(':checked')) {
             $spinner.show()
             $.getJSON("/_mnist/" + batch + "/washout/" + $brightnessSlider.val(), renderMnist);
+        }
+    })
+
+    // Handle washout interaction
+    $swirlLabel.html(0)
+    $swirlSlider.val(0)
+    $swirlSlider.change((evt) => {
+        if ($swirlEnabled.is(':checked')) {
+            $spinner.show()
+            $.getJSON("/_mnist/" + batch + "/swirl/" + $swirlSlider.val(), renderMnist);
         }
     })
 
@@ -252,5 +259,6 @@ $(function() {
     })
 
     // Kick off the first batch
-    $.getJSON("/_mnist/" + batch + "/noise/" + startingNoise, renderMnist);
+    // $.getJSON("/_mnist/" + batch + "/noise/" + startingNoise, renderMnist);
+    $.getJSON("/_mnist/" + batch + "/swirl/1", renderMnist);
 })

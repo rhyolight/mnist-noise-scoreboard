@@ -1,5 +1,6 @@
 body {
   margin: 100px;
+  font-family: Verdana;
 }
 
 canvas {
@@ -57,4 +58,21 @@ div {
     border: black solid 3px;
     border-radius: 4px;
     padding: 20px;
+}
+
+#digit-detail li {
+  list-style: none;
+  font-size: x-large;
+  margin-left: -20px;
+}
+
+.input-group-append {
+  padding: 0 10px;
+  border: 1px solid #ced4da;
+  border-radius: .25rem;
+  width: 300px;
+}
+
+input[type=range] {
+  margin-right: 16px;
 }
