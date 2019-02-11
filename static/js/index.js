@@ -1,4 +1,3 @@
-
 $(function() {
 
     // DOM stuff used below
@@ -7,14 +6,37 @@ $(function() {
     let $noiseLabel = $('#noise-label')
     let $spinner = $('.spinner-border')
 
+    // last classification results
+    let results
+
     // Functions
+
+    function drawMnist(digit, $canvas) {
+        let canvas = $canvas[0]
+        let context = canvas.getContext('2d')
+        var imageData = context.getImageData(0, 0, 28, 28);
+        for (var i = 0; i < digit.length; i++) {
+            imageData.data[i * 4] = digit[i] * 255;
+            imageData.data[i * 4 + 1] = digit[i] * 255;
+            imageData.data[i * 4 + 2] = digit[i] * 255;
+            imageData.data[i * 4 + 3] = 255;
+        }
+        context.putImageData(imageData, 0, 0);
+    }
+
+    function getOffset( el ) {
+        var _x = 0;
+        var _y = 0;
+        while( el && !isNaN( el.offsetLeft ) && !isNaN( el.offsetTop ) ) {
+            _x += el.offsetLeft - el.scrollLeft;
+            _y += el.offsetTop - el.scrollTop;
+            el = el.offsetParent;
+        }
+        return { top: _y, left: _x };
+    }
 
     function inverse(array) {
         return array.map(i => { return 1.0 - i })
-    }
-
-    function getMnist(batch, noise, cb) {
-      $.getJSON("/_mnist/" + batch + "/" + noise, cb);
     }
 
     /* From http://stackoverflow.com/questions/7128675/from-green-to-red-color-depend-on-percentage */
@@ -32,14 +54,27 @@ $(function() {
     }
 
     function renderMnist(resp) {
+        results = resp
+        clearModelHighlight()
+        hideDigitDetail()
         $canvasBag.html('')
         $noiseLabel.html($noiseSlider.val())
-        resp.data.forEach(digit => {
+        let models = Object.keys(resp.classifications)
+        resp.data.forEach((digit, i) => {
             let $canvas = $('<canvas>')
+                .attr('id', 'digit-' + i)
                 .attr('width', width)
                 .attr('height', height)
+                .attr('data-index', i)
+                .attr('data-target', resp.targets[i])
+                .attr('data-index', i)
+                .addClass('mnist')
+            models.forEach(m => {
+                let modelClassifications = results.classifications[m].classifications[i][0]
+                $canvas.attr('data-' + m + '-classification', modelClassifications)
+            })
             $canvasBag.append($canvas)
-            mnist.draw(inverse(digit.flat(2)), $canvas[0].getContext('2d'))
+            drawMnist(inverse(digit.flat(2)), $canvas, 1)
         })
         Object.keys(resp.classifications).forEach(c => {
             let results = resp.classifications[c]
@@ -50,7 +85,74 @@ $(function() {
               'background-color': '#' + getGreenToRed(100-accuracy),
             })
         })
+        // Handle digit interaction
+        $('canvas').click(evt => {
+            let digitIndex = $(evt.currentTarget).attr('id').split('-').pop()
+            hideDigitDetail()
+            showDigitDetail(digitIndex)
+        })
         $spinner.hide()
+    }
+
+    function showDigitDetail(i) {
+        let scale = 6
+        let digit = results.data[i]
+        let $d = $('<div>').attr('id', 'digit-detail')
+        let $c = $('#digit-' + i)
+        let topLeft = getOffset($c.get(0))
+        let $digitCanvas = $('<canvas>')
+            .attr('width', 28 * scale)
+            .attr('height', 28 * scale)
+        let smallCanvas = $c[0]
+        $d.css({top: topLeft.top, left: topLeft.left})
+        $d.append($digitCanvas)
+        let digitCanvas = $digitCanvas.get(0)
+        let largeContext = digitCanvas.getContext('2d')
+        var largeDigit = new Image();
+        largeDigit.onload = function(){
+            largeContext.clearRect(0, 0, digitCanvas.width, digitCanvas.height);
+            largeContext.scale(scale, scale);
+            largeContext.drawImage(largeDigit, 0, 0);
+        }
+        // Loads the small mnist canvas data into new image.
+        largeDigit.src = smallCanvas.toDataURL();
+
+        drawMnist(inverse(digit.flat(2)), $digitCanvas)
+        $('body').append($d)
+    }
+
+    function hideDigitDetail() {
+        $('#digit-detail').remove()
+    }
+
+    function clearModelHighlight() {
+        $('.overlay').remove()
+        $('.model').removeClass('highlight')
+    }
+
+    function highlightModel(model) {
+      hideDigitDetail()
+      let modelResults = results.classifications[model].classifications
+      $('#' + model).addClass('highlight')
+      results.targets.forEach((target, i) => {
+          let modelGuess = modelResults[i]
+          let $c = $('#digit-' + i)
+          let $o = $('<div>').addClass('overlay')
+          if (target == modelGuess) {
+              $o.addClass('correct')
+          } else {
+              $o.addClass('incorrect')
+          }
+          let topLeft = getOffset($c.get(0))
+          $o.css({top: topLeft.top, left: topLeft.left})
+          // Handle digit interaction
+          $o.click(evt => {
+              hideDigitDetail()
+              showDigitDetail(i)
+          })
+          $('body').append($o)
+          $o.show()
+      })
     }
 
     // Program start
@@ -60,12 +162,22 @@ $(function() {
     let startingNoise = 0
     let communicating = false
 
+    // Handle noise interaction
     $noiseLabel.html(startingNoise)
     $noiseSlider.val(startingNoise)
     $noiseSlider.change((evt) => {
         $spinner.show()
-        getMnist(batch, $noiseSlider.val(), renderMnist)
+        $.getJSON("/_mnist/" + batch + "/" + $noiseSlider.val(), renderMnist);
     })
 
-    getMnist(batch, startingNoise, renderMnist)
+    // Handle Model interaction
+    $('.model').hover(evt => {
+        let model = $(evt.currentTarget).attr('id')
+        clearModelHighlight()
+        hideDigitDetail()
+        highlightModel(model)
+    })
+
+    // Kick off the first batch
+    $.getJSON("/_mnist/" + batch + "/" + startingNoise, renderMnist);
 })

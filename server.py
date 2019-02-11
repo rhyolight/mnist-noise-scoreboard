@@ -16,7 +16,7 @@ import torch
 import torch.nn.functional as F
 from torchvision import datasets, transforms
 
-from image_transforms import RandomNoise
+from image_transforms import RandomNoise, Boxes
 
 # ML models
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -53,13 +53,15 @@ def styles():
 
 class Mnist(Resource):
     def get(self, batch, noise):
+        # imageTransform = RandomNoise(noise / 100., whiteValue=0.1307 + 2*0.3081)
+        imageTransform = Boxes(size=6)
         dataset = datasets.MNIST("mnist",
             train=False,
             download=True,
             transform=transforms.Compose(
                 [
                     transforms.ToTensor(),
-                    RandomNoise(noise / 100., whiteValue=0.1307 + 2*0.3081),
+                    imageTransform,
                     transforms.Normalize((0.1307,), (0.3081,))
                 ]
             ),

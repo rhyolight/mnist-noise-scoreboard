@@ -23,3 +23,38 @@ div {
   position: absolute;
   padding: 100px;
 }
+
+.overlay {
+    position: absolute;
+    display: none;
+    width: 28px;
+    height: 28px;
+    opacity: 0.2
+}
+
+.overlay.correct {
+    background-color: limegreen;
+}
+.overlay.incorrect {
+    background-color: red;
+}
+
+.model {
+    border: solid 3px black;
+    margin: 20px; 0;
+    padding: 20px;
+    border-radius: 20px;
+}
+
+.model.highlight {
+    background-color: #eee;
+    filter: drop-shadow(10px 10px 4px black);
+}
+
+#digit-detail {
+    position: absolute;
+    background-color: white;
+    border: black solid 3px;
+    border-radius: 4px;
+    padding: 20px;
+}

@@ -3,3 +3,4 @@ mnist/
 .bowerrc
 bower.json
 static/lib/
+*.pyc

@@ -1,23 +1,5 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="utf-8">
-
-  <meta name="description" content="The HTML5 Herald">
-  <meta name="author" content="SitePoint">
-
-
-</head>
-
-<body>
-
-</body>
-</html>
-
-
-
-<!doctype html>
-<html lang="en">
   <head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -29,12 +11,12 @@
           crossorigin="anonymous">
     <link rel="stylesheet" href="css/styles.css?v=1.0">
 
-    <title>MNIST Noise Scoreboard</title>
+    <title>Noisy MNIST SparseNet Demo</title>
 
   </head>
   <body>
 
-    <h1>Noisey MNIST SparseNet Demo</h1>
+    <h1>Noisy MNIST SparseNet Demo</h1>
 
     <div id="scoreboard" class="container">
 
@@ -56,7 +38,7 @@
           <div class="container">
 
             <div class="row">
-              <div class="col">
+              <div class="col model" id="denseCNN1">
                 <h2>Dense CNN</h2>
                 <h3 id="denseCNN1-score"></h3>
                 <div class="progress">
@@ -66,7 +48,7 @@
             </div>
 
             <div class="row">
-              <div class="col">
+              <div class="col model" id="sparseCNN1">
                 <h2>SparseNet</h2>
                 <h3 id="sparseCNN1-score"></h3>
                 <div class="progress">
@@ -86,7 +68,6 @@
     <script src="/static/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
     <script src="/static/lib/bootstrap/dist/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-    <script src="/static/lib/mnist/dist/mnist.js"></script>
 
     <script src="/static/js/index.js"></script>
 

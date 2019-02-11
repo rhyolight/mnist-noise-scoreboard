@@ -1,6 +1,12 @@
 import os
 import numpy as np
-import skimage.io
+from skimage import io, transform
+import torch
+
+from skimage import data
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
 class RandomNoise(object):
   """
@@ -46,4 +52,26 @@ class RandomNoise(object):
                                + str(self.iteration).rjust(6,'0') + ".png")
         skimage.io.imsave(outfile,image.view(28,28))
 
+    return image
+
+
+class Boxes(object):
+  """
+  An image transform that adds stripes in the image.
+  """
+  def __init__(self,
+               size=2,
+               whiteValue=0.1307 + 2*0.3081):
+    """
+    """
+    self.size = size
+    self.whiteValue = whiteValue
+
+
+
+  def __call__(self, image):
+    for x in range(image.shape[1]):
+      for y in range(image.shape[2]):
+        if (x%self.size-1)==0 or (y%self.size-1)==0:
+          image.data[0][x][y] = self.whiteValue
     return image
