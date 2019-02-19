@@ -1,8 +1,11 @@
 $(function() {
 
-   // DOM stuff used below
-   let $canvasBag = $('#canvas-bag')
-   let $spinner = $('.spinner-border')
+    const CLASSES = ['unknown', 'silence', 'zero', 'one', 'two', 'three',
+                     'four', 'five', 'six', 'seven', 'eight', 'nine']
+
+    // DOM stuff used below
+    let $canvasBag = $('#canvas-bag')
+    let $spinner = $('.spinner-border')
 
 //    let $noiseSlider = $('#noise')
 //    let $noiseLabel = $('#noise-label')
@@ -25,12 +28,12 @@ $(function() {
 //    let $rotateLabel = $('#rotate-label')
 //    let $rotateEnabled = $('#rotate-enabled')
 //
-   // last classification results
-   let results
+    // last classification results
+    let results
 
-   // Functions
+    // Functions
 
-   function drawMelSpectrogram(mel, $canvas) {
+    function drawMelSpectrogram(mel, $canvas) {
        let canvas = $canvas[0]
        let context = canvas.getContext('2d')
        var imageData = context.getImageData(0, 0, width, height);
@@ -49,9 +52,9 @@ $(function() {
            })
        })
        context.putImageData(imageData, 0, 0);
-   }
+    }
 
-   function getOffset( el ) {
+    function getOffset( el ) {
        var _x = 0;
        var _y = 0;
        while( el && !isNaN( el.offsetLeft ) && !isNaN( el.offsetTop ) ) {
@@ -60,7 +63,7 @@ $(function() {
            el = el.offsetParent;
        }
        return { top: _y, left: _x };
-   }
+    }
 
 //    function inverse(array) {
 //        return array.map(i => { return 1.0 - i })
@@ -129,7 +132,7 @@ $(function() {
        $d.css({top: topLeft.top, left: topLeft.left})
        $d.append($melCanvas)
        let $detail = $('<ul>')
-       $detail.append('<li>Target: ' + results.targets[i] + '</li>')
+       $detail.append('<li>Target: ' + CLASSES[results.targets[i]] + '</li>')
        // $detail.append('<li>Dense CNN: ' + results.classifications.denseCNN1.classifications[i])
        // $detail.append('<li>Sparse CNN: ' + results.classifications.sparseCNN1.classifications[i])
        $d.append($detail)
@@ -146,6 +149,9 @@ $(function() {
 
        drawMelSpectrogram(mel, $melCanvas)
        $('body').append($d)
+
+       var audio = new Audio(results.paths[i]);
+       audio.play();
    }
 
    function hideMelDetail() {

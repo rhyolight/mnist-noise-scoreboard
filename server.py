@@ -81,6 +81,11 @@ def styles():
     return send_from_directory('static/css', 'styles.css')
 
 
+@app.route('/data/speech/speech_commands/test/<classification>/<filename>')
+def wav_static(classification, filename):
+    return send_from_directory(os.path.join('data/speech/speech_commands/test/', classification), filename)
+
+
 class Mnist(Resource):
     NAME = "mnist"
 
@@ -215,12 +220,11 @@ class Speech(Resource):
 
         batch_idx, result = next(enumerate(dataloader))
 
-        # print(result.keys())
-
         # Construct and emit response
         response = {
             "data": result['mel_spectrogram'].data.cpu().numpy().tolist(),
             "targets": result['target'].data.cpu().numpy().tolist(),
+            "paths": result['path'],
             # "classifications": getClassificationResults(example_data, self.NAME, example_targets),
         }
         return response, 200
