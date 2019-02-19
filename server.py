@@ -19,9 +19,14 @@ from pytorch.speech_commands_dataset import (
 )
 from pytorch.audio_transforms import (ToMelSpectrogramFromSTFT,
                                       ToSTFT,
+                                      ChangeAmplitude,
+                                      ChangeSpeedAndPitchAudio,
                                       DeleteSTFT,
                                       LoadAudio,
                                       FixAudioLength,
+                                      StretchAudioOnSTFT,
+                                      TimeshiftAudioOnSTFT,
+                                      FixSTFTDimension,
                                       )
 from pytorch.audio_transforms import ToTensor as ToAudioTensor
 
@@ -39,16 +44,40 @@ models['speech']['denseCNN1'] = torch.load('models/speech/denseCNN2_c1_out_chann
 models['speech']['sparseCNN1'] = torch.load('models/speech/sparseCNN2_n1000.pt', map_location=device)
 
 
-def getClassificationResults(data, type, target):
+def getMnistClassificationResults(data, modelType, target):
     result = {}
     with torch.no_grad():
-        for name in models[type]:
-            model = models[type][name]
+        for name in models[modelType]:
+            model = models[modelType][name]
             data, target = data.to(device), target.to(device)
+            data = data.double()
+            print(data.dtype)
             output = model(data)
             test_loss = F.nll_loss(output, target, reduction='sum').item()
             pred = output.max(1, keepdim=True)[1]
             correct = pred.eq(target.view_as(pred)).sum().item()
+            result[name] = {}
+            result[name]["accuracy"] = float(correct) / len(data)
+            result[name]["classifications"] = pred.cpu().numpy().tolist()
+    return result
+
+
+def getSpeechClassificationResults(data, modelType, target):
+    result = {}
+    with torch.no_grad():
+        for name in models[modelType]:
+            model = models[modelType][name]
+            model.eval()
+            test_loss = 0
+            correct = 0
+            data = torch.unsqueeze(data, 1)
+            data, target = data.to(device), target.to(device)
+            print(data.dtype)
+            output = model(data)
+            test_loss += F.nll_loss(output, target, reduction='sum').item()
+            pred = output.max(1, keepdim=True)[1]
+            correct += pred.eq(target.view_as(pred)).sum().item()
+
             result[name] = {}
             result[name]["accuracy"] = float(correct) / len(data)
             result[name]["classifications"] = pred.cpu().numpy().tolist()
@@ -81,9 +110,9 @@ def styles():
     return send_from_directory('static/css', 'styles.css')
 
 
-@app.route('/data/speech/speech_commands/test/<classification>/<filename>')
+@app.route('/data/speech/speech_commands/valid/<classification>/<filename>')
 def wav_static(classification, filename):
-    return send_from_directory(os.path.join('data/speech/speech_commands/test/', classification), filename)
+    return send_from_directory(os.path.join('data/speech/speech_commands/valid/', classification), filename)
 
 
 class Mnist(Resource):
@@ -126,7 +155,7 @@ class Mnist(Resource):
         response = {
             "data": example_data.data.cpu().numpy().tolist(),
             "targets": example_targets.data.cpu().numpy().tolist(),
-            "classifications": getClassificationResults(example_data, self.NAME, example_targets),
+            "classifications": getMnistClassificationResults(example_data, self.NAME, example_targets),
         }
         return response, 200
 
@@ -141,51 +170,32 @@ class Speech(Resource):
         args = parser.parse_args()
 
     def get(self, batch, xform, xformStrength):
-        dataDir = os.path.join("data", self.NAME, "speech_commands", "test")
+        dataDir = os.path.join("data", self.NAME, "speech_commands", "valid")
 
-        # Create transforms
-        # if xform == "noise":
-        #     imageTransform = RandomNoise(xformStrength / 100.)
-        # elif xform == "grid":
-        #     imageTransform = Grid(size=xformStrength)
-        # elif xform == "wipe":
-        #     imageTransform = Wipe(percent=xformStrength / 100.)
-        # elif xform == "invert":
-        #     imageTransform = Invert()
-        # elif xform == "swirl":
-        #     imageTransform = Swirl(level=xformStrength / 100.)
-        # elif xform == "washout":
-        #     imageTransform = Washout(level=xformStrength / 100.)
-        # elif xform == "rotate":
-        #     imageTransform = Rotate(degrees=xformStrength)
-        # else:
-        #     imageTransform = transforms.ToTensor
-
-        # dataAugmentationTransform = transforms.Compose([
-        #     ChangeAmplitude(),
-        #     ChangeSpeedAndPitchAudio(),
-        #     FixAudioLength(),
-        #     ToSTFT(),
-        #     StretchAudioOnSTFT(),
-        #     TimeshiftAudioOnSTFT(),
-        #     FixSTFTDimension(),
-        # ])
+        dataAugmentationTransform = transforms.Compose([
+            # ChangeAmplitude(),
+            # ChangeSpeedAndPitchAudio(),
+            FixAudioLength(),
+            ToSTFT(),
+            # StretchAudioOnSTFT(),
+            # TimeshiftAudioOnSTFT(),
+            # FixSTFTDimension(),
+        ])
 
         n_mels = 32
         melTransform = transforms.Compose(
             [
-                ToSTFT(),
                 ToMelSpectrogramFromSTFT(n_mels=n_mels),
                 DeleteSTFT(),
-                # ToAudioTensor('mel_spectrogram', 'input'),
+                ToAudioTensor('mel_spectrogram', 'input'),
             ])
 
         dataset = SpeechCommandsDataset(
             dataDir,
             transforms.Compose([
                 LoadAudio(),
-                FixAudioLength(),
-                melTransform
+                dataAugmentationTransform,
+                melTransform,
             ]))
 
         dataloader = torch.utils.data.DataLoader(dataset,
@@ -194,38 +204,18 @@ class Speech(Resource):
                                                  shuffle=True,
                                                  )
 
-        # self.test_loader = DataLoader(testDataset,
-        #                               batch_size=params["batch_size"],
-        #                               sampler=None,
-        #                               shuffle=False,
-        #                               pin_memory=self.use_cuda,
-        #                               )
-
-        # Create dataset and loader
-        # dataset = datasets.MNIST(self.NAME,
-        #     train=False,
-        #     download=True,
-        #     transform=transforms.Compose(
-        #         [
-        #             transforms.ToTensor(),
-        #             imageTransform,
-        #             transforms.Normalize((0.1307,), (0.3081,))
-        #         ]
-        #     ),
-        # )
-        # dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch, shuffle=True)
-
         # Run One Batch
-        # batch_idx, (example_data, example_targets) = next(enumerate(dataloader))
-
         batch_idx, result = next(enumerate(dataloader))
+        data = result['mel_spectrogram']
+        targets = result['target']
 
         # Construct and emit response
         response = {
-            "data": result['mel_spectrogram'].data.cpu().numpy().tolist(),
-            "targets": result['target'].data.cpu().numpy().tolist(),
+            "data": data.data.cpu().numpy().tolist(),
+            "targets": targets.data.cpu().numpy().tolist(),
             "paths": result['path'],
-            # "classifications": getClassificationResults(example_data, self.NAME, example_targets),
+            # FIXME: this doesn't work yet
+            "classifications": getSpeechClassificationResults(data, self.NAME, targets),
         }
         return response, 200
 
