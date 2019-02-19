@@ -1,7 +1,9 @@
 .DS_Store
 __pycache__/
-mnist/
+data/
 .bowerrc
 bower.json
 static/lib/
 *.pyc
+.idea/
+models/

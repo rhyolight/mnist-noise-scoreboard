@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en">
-  <head>
+<head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -11,151 +11,31 @@
           crossorigin="anonymous">
     <link rel="stylesheet" href="css/styles.css?v=1.0">
 
-    <title>Noisy MNIST SparseNet Demo</title>
+    <title>SparseNet Demos</title>
 
-  </head>
-  <body>
+</head>
+<body>
 
-    <h1>Noisy MNIST SparseNet Demo</h1>
+<h1>SparseNet Demos</h1>
 
-    <div id="scoreboard" class="container">
+<div class="btn-group btn-group-lg" role="group" aria-label="SparseNet Demos">
+    <form action="mnist.html">
+        <button type="submit" class="btn btn-warning">MNIST</button>
+    </form>
+    <form action="speech.html">
+        <button type="submit" class="btn btn-info">Google Speech</button>
+    </form>
+</div>
 
-      <div class="row">
+<script src="/static/lib/jquery/dist/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"
+        integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut"
+        crossorigin="anonymous"></script>
+<script src="/static/lib/bootstrap/dist/js/bootstrap.min.js"
+        integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k"
+        crossorigin="anonymous"></script>
 
-        <div class="col-8">
-          <div class="spinner-border" style="width: 13rem; height: 13rem;" role="status">
-            <span class="sr-only">Loading...</span>
-          </div>
-          <div id="canvas-bag"></div>
+<script src="/static/js/index.js"></script>
 
-          <br/>
-
-          <div class="sliders">
-
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">
-                  <input type="radio" id="noise-enabled">
-                </div>
-              </div>
-              <div class="input-group-append">
-                <input type="range" id="noise" name="noise" min="0" max="100">
-                <label for="noise"><span id="noise-label"></span>% Noise</label>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">
-                  <input type="radio" id="grid-enabled">
-                </div>
-              </div>
-              <div class="input-group-append">
-                <input type="range" id="grid" name="grid" min="2" max="14">
-                <label for="grid">Grid Size: <span id="grid-label"></span></label>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">
-                  <input type="radio" id="wipe-enabled">
-                </div>
-              </div>
-              <div class="input-group-append">
-                <input type="range" id="wipe" name="wipe" min="0" max="100">
-                <label for="wipe"><span id="wipe-label"></span>% Wipe</label>
-              </div>
-            </div>
-
-            <!-- <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">
-                  <input type="radio" id="invert-enabled">
-                </div>
-              </div>
-              <div class="input-group-append">
-                <input type="range" id="invert" name="invert" min="50" max="150">
-                <label for="invert">Inversion<span id="invert-label"></span></label>
-              </div>
-            </div> -->
-
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">
-                  <input type="radio" id="washout-enabled">
-                </div>
-              </div>
-              <div class="input-group-append">
-                <input type="range" id="washout" name="washout" min="0" max="100">
-                <label for="washout"><span id="washout-label"></span>% washout</label>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">
-                  <input type="radio" id="swirl-enabled">
-                </div>
-              </div>
-              <div class="input-group-append">
-                <input type="range" id="swirl" name="swirl" min="0" max="100">
-                <label for="swirl"><span id="swirl-label"></span> swirl</label>
-              </div>
-            </div>
-
-            <div class="input-group">
-              <div class="input-group-prepend">
-                <div class="input-group-text">
-                  <input type="radio" id="rotate-enabled">
-                </div>
-              </div>
-              <div class="input-group-append">
-                <input type="range" id="rotate" name="rotate" min="0" max="360">
-                <label for="rotate"><span id="rotate-label"></span> rotate</label>
-              </div>
-            </div>
-
-          </div>
-        </div>
-
-        <div class="col-4">
-
-          <div class="container">
-
-            <div class="row">
-              <div class="col model" id="denseCNN1">
-                <h2>Dense CNN</h2>
-                <h3 id="denseCNN1-score"></h3>
-                <div class="progress">
-                  <div id="denseCNN1-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col model" id="sparseCNN1">
-                <h2>SparseNet</h2>
-                <h3 id="sparseCNN1-score"></h3>
-                <div class="progress">
-                  <div id="sparseCNN1-progress" class="progress-bar" role="progressbar" style="width: 0%"></div>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-    </div>
-
-    <script src="/static/lib/jquery/dist/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js" integrity="sha384-wHAiFfRlMFy6i5SRaxvfOCifBUQy1xHdJ/yoi7FRNXMRBu5WHdZYu1hA6ZOblgut" crossorigin="anonymous"></script>
-    <script src="/static/lib/bootstrap/dist/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
-
-    <script src="/static/js/index.js"></script>
-
-  </body>
+</body>
 </html>
