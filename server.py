@@ -12,11 +12,18 @@ from flask import Flask, send_from_directory
 
 import torch.nn.functional as F
 from torchvision import datasets, transforms
+from image_transforms import *
 
 from pytorch.speech_commands_dataset import (
     SpeechCommandsDataset, BackgroundNoiseDataset
 )
-from image_transforms import *
+from pytorch.audio_transforms import (ToMelSpectrogramFromSTFT,
+                                      ToSTFT,
+                                      DeleteSTFT,
+                                      LoadAudio,
+                                      FixAudioLength,
+                                      )
+from pytorch.audio_transforms import ToTensor as ToAudioTensor
 
 # ML models
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -129,8 +136,7 @@ class Speech(Resource):
         args = parser.parse_args()
 
     def get(self, batch, xform, xformStrength):
-
-        trainDataDir = os.path.join("data", self.NAME, "train")
+        dataDir = os.path.join("data", self.NAME, "speech_commands", "test")
 
         # Create transforms
         # if xform == "noise":
@@ -159,24 +165,36 @@ class Speech(Resource):
         #     TimeshiftAudioOnSTFT(),
         #     FixSTFTDimension(),
         # ])
-        #
-        # featureTransform = transforms.Compose(
-        #     [
-        #         ToMelSpectrogramFromSTFT(n_mels=n_mels),
-        #         DeleteSTFT(),
-        #         ToTensor('mel_spectrogram', 'input')
-        #     ])
-        #
-        # trainDataset = SpeechCommandsDataset(
-        #     trainDataDir,
-        #     transforms.Compose([
-        #         LoadAudio(),
-        #         dataAugmentationTransform,
-        #         # add_bg_noise,               # Uncomment to allow adding BG noise
-        #         # during training
-        #         featureTransform
-        #     ]))
 
+        n_mels = 32
+        melTransform = transforms.Compose(
+            [
+                ToSTFT(),
+                ToMelSpectrogramFromSTFT(n_mels=n_mels),
+                DeleteSTFT(),
+                # ToAudioTensor('mel_spectrogram', 'input'),
+            ])
+
+        dataset = SpeechCommandsDataset(
+            dataDir,
+            transforms.Compose([
+                LoadAudio(),
+                FixAudioLength(),
+                melTransform
+            ]))
+
+        dataloader = torch.utils.data.DataLoader(dataset,
+                                                 batch_size=batch,
+                                                 sampler=None,
+                                                 shuffle=True,
+                                                 )
+
+        # self.test_loader = DataLoader(testDataset,
+        #                               batch_size=params["batch_size"],
+        #                               sampler=None,
+        #                               shuffle=False,
+        #                               pin_memory=self.use_cuda,
+        #                               )
 
         # Create dataset and loader
         # dataset = datasets.MNIST(self.NAME,
@@ -195,15 +213,17 @@ class Speech(Resource):
         # Run One Batch
         # batch_idx, (example_data, example_targets) = next(enumerate(dataloader))
 
-        # Construct and emit response
-        # response = {
-        #     "data": example_data.data.cpu().numpy().tolist(),
-        #     "targets": example_targets.data.cpu().numpy().tolist(),
-        #     "classifications": getClassificationResults(example_data, self.NAME, example_targets),
-        # }
-        # return response, 200
+        batch_idx, result = next(enumerate(dataloader))
 
-        return 404
+        # print(result.keys())
+
+        # Construct and emit response
+        response = {
+            "data": result['mel_spectrogram'].data.cpu().numpy().tolist(),
+            "targets": result['target'].data.cpu().numpy().tolist(),
+            # "classifications": getClassificationResults(example_data, self.NAME, example_targets),
+        }
+        return response, 200
 
 
 api.add_resource(Speech, "/_speech/<int:batch>/<string:xform>/<int:xformStrength>")

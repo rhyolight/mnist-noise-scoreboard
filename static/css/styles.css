@@ -52,7 +52,7 @@ div {
     filter: drop-shadow(10px 10px 4px black);
 }
 
-#digit-detail {
+#digit-detail, #mel-detail {
     position: absolute;
     background-color: white;
     border: black solid 3px;
@@ -60,7 +60,7 @@ div {
     padding: 20px;
 }
 
-#digit-detail li {
+#digit-detail li, #mel-detail li {
   list-style: none;
   font-size: x-large;
   margin-left: -20px;

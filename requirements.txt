@@ -1,6 +1,8 @@
+flask
 flask-restful
 # https://github.com/pytorch/pytorch/issues/16775
 typing
 torch
 torchvision
 scikit-image
+librosa

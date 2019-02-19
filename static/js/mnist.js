@@ -273,6 +273,5 @@ $(function() {
     })
 
     // Kick off the first batch
-    // $.getJSON("/_mnist/" + batch + "/noise/" + startingNoise, renderMnist);
-    $.getJSON("/_mnist/" + batch + "/swirl/1", renderMnist);
+    $.getJSON("/_mnist/" + batch + "/noise/" + startingNoise, renderMnist);
 })
