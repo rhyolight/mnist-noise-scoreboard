@@ -7,9 +7,9 @@ $(function() {
     let $canvasBag = $('#canvas-bag')
     let $spinner = $('.spinner-border')
 
-//    let $noiseSlider = $('#noise')
-//    let $noiseLabel = $('#noise-label')
-//    let $noiseEnabled = $('#noise-enabled')
+   let $noiseSlider = $('#noise')
+   let $noiseLabel = $('#noise-label')
+   let $noiseEnabled = $('#noise-enabled')
 //    let $gridSlider = $('#grid')
 //    let $gridLabel = $('#grid-label')
 //    let $gridEnabled = $('#grid-enabled')
@@ -88,6 +88,7 @@ $(function() {
         // clearModelHighlight()
         // hideDigitDetail()
         $canvasBag.html('')
+        $noiseLabel.html($noiseSlider.val())
         resp.data.forEach((mel, i) => {
             let $canvas = $('<canvas>')
                 .attr('id', 'mel-' + i)
@@ -159,7 +160,7 @@ $(function() {
            let filename = parts[5]
            let originalUrl = '/_wavs/original/' + targetName + '/' + filename
            let augUrl = '/_wavs/augmented/' + targetIndex + '/' + filename
-           var audio = new Audio(originalUrl)
+           var audio = new Audio(augUrl)
            audio.play()
        }
    }
@@ -197,20 +198,20 @@ $(function() {
 //          $o.show()
 //      })
 //    }
-//
-//    let startingNoise = 0
-//    let communicating = false
-//
-//    // Handle noise interaction
-//    $noiseLabel.html(startingNoise)
-//    $noiseSlider.val(startingNoise)
-//    $noiseSlider.change((evt) => {
-//        if ($noiseEnabled.is(':checked')) {
-//            $spinner.show()
-//            $.getJSON("/_mnist/" + batch + "/noise/" + $noiseSlider.val(), renderMnist);
-//        }
-//    })
-//
+
+   let startingNoise = 0
+   let communicating = false
+
+   // Handle noise interaction
+   $noiseLabel.html(startingNoise)
+   $noiseSlider.val(startingNoise)
+   $noiseSlider.change((evt) => {
+       if ($noiseEnabled.is(':checked')) {
+           $spinner.show()
+           $.getJSON("/_speech/" + batch + "/noise/" + $noiseSlider.val(), renderSpeech);
+       }
+   })
+
 //    // Handle Grid Size interaction
 //    $gridLabel.html(2)
 //    $gridSlider.val(2)
@@ -286,12 +287,10 @@ $(function() {
     let batch = 300
     let width = 32
     let height = 32
-    let xform = 'noise'
-    let xformStrength = 15
 
     // Kick off the first batch
     // $.getJSON("/_mnist/" + batch + "/noise/" + startingNoise, renderMnist);
     $.getJSON(
-        "/_speech/" + batch + "/" + xform + "/" + xformStrength, renderSpeech
+        "/_speech/" + batch + "/noise/" + startingNoise, renderSpeech
     )
 })

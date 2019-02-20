@@ -143,7 +143,6 @@ def wav_static(word, filename):
 def wav_static_augmented(word, filename):
     path = SPEECH_TMP
     file = "{}_{}".format(word, filename)
-    print("Loading WAV from {}/{}".format(path, file))
     return send_from_directory(path, file)
 
 
