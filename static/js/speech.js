@@ -150,8 +150,18 @@ $(function() {
        drawMelSpectrogram(mel, $melCanvas)
        $('body').append($d)
 
-       var audio = new Audio(results.paths[i]);
-       audio.play();
+       let path = results.paths[i]
+       let target = results.targets[i]
+       if (path) {
+           let parts = path.split(/\//)
+           let targetName = parts[4]
+           let targetIndex = CLASSES.indexOf(targetName)
+           let filename = parts[5]
+           let originalUrl = '/_wavs/original/' + targetName + '/' + filename
+           let augUrl = '/_wavs/augmented/' + targetIndex + '/' + filename
+           var audio = new Audio(originalUrl)
+           audio.play()
+       }
    }
 
    function hideMelDetail() {
@@ -276,8 +286,12 @@ $(function() {
     let batch = 300
     let width = 32
     let height = 32
+    let xform = 'noise'
+    let xformStrength = 15
 
     // Kick off the first batch
     // $.getJSON("/_mnist/" + batch + "/noise/" + startingNoise, renderMnist);
-    $.getJSON("/_speech/" + batch + "/NA/0", renderSpeech);
+    $.getJSON(
+        "/_speech/" + batch + "/" + xform + "/" + xformStrength, renderSpeech
+    )
 })

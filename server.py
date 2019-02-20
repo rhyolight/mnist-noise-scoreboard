@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 from flask_restful import Api, Resource, reqparse
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, send_file
 
 import torch.nn.functional as F
 from torchvision import datasets, transforms
@@ -27,8 +27,13 @@ from pytorch.audio_transforms import (ToMelSpectrogramFromSTFT,
                                       StretchAudioOnSTFT,
                                       TimeshiftAudioOnSTFT,
                                       FixSTFTDimension,
+                                      AddNoise,
+                                      ToWavFile,
                                       )
 from pytorch.audio_transforms import ToTensor as ToAudioTensor
+
+SPEECH_DATA = os.path.join("data", "speech", "speech_commands", "valid")
+SPEECH_TMP = os.path.join("data", "speech", "tmp")
 
 # ML models
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -82,6 +87,24 @@ def getSpeechClassificationResults(data, target):
     return result
 
 
+def createAudioXform(xform, xformStrength):
+
+    myXforms = [
+        FixAudioLength(),
+    ]
+    if xform == "noise":
+        myXforms.append(AddNoise(alpha=xformStrength / 100.))
+
+    # ChangeAmplitude(),
+    # ChangeSpeedAndPitchAudio(),
+    # StretchAudioOnSTFT(),
+    # TimeshiftAudioOnSTFT(),
+    # FixSTFTDimension(),
+
+    myXforms.append(ToSTFT())
+    return transforms.Compose(myXforms)
+
+
 # Web App:
 app = Flask(__name__)
 api = Api(app)
@@ -108,9 +131,20 @@ def styles():
     return send_from_directory('static/css', 'styles.css')
 
 
-@app.route('/data/speech/speech_commands/valid/<classification>/<filename>')
-def wav_static(classification, filename):
-    return send_from_directory(os.path.join('data/speech/speech_commands/valid/', classification), filename)
+@app.route('/_wavs/original/<word>/<filename>')
+def wav_static(word, filename):
+    path = os.path.join('data/speech/speech_commands/valid/', word)
+    return send_from_directory(
+        path, filename
+    )
+
+
+@app.route('/_wavs/augmented/<word>/<filename>')
+def wav_static_augmented(word, filename):
+    path = SPEECH_TMP
+    file = "{}_{}".format(word, filename)
+    print("Loading WAV from {}/{}".format(path, file))
+    return send_from_directory(path, file)
 
 
 class Mnist(Resource):
@@ -168,17 +202,8 @@ class Speech(Resource):
         args = parser.parse_args()
 
     def get(self, batch, xform, xformStrength):
-        dataDir = os.path.join("data", self.NAME, "speech_commands", "valid")
-
-        dataAugmentationTransform = transforms.Compose([
-            # ChangeAmplitude(),
-            # ChangeSpeedAndPitchAudio(),
-            FixAudioLength(),
-            ToSTFT(),
-            # StretchAudioOnSTFT(),
-            # TimeshiftAudioOnSTFT(),
-            # FixSTFTDimension(),
-        ])
+        tempPath = SPEECH_TMP
+        dataAugmentationTransform = createAudioXform(xform, xformStrength)
 
         n_mels = 32
         melTransform = transforms.Compose(
@@ -189,10 +214,11 @@ class Speech(Resource):
             ])
 
         dataset = SpeechCommandsDataset(
-            dataDir,
+            SPEECH_DATA,
             transforms.Compose([
                 LoadAudio(),
                 dataAugmentationTransform,
+                ToWavFile(tempPath),
                 melTransform,
             ]))
 
