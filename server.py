@@ -1,11 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 """
 
 Usage::
     ./server.py [<port>]
 """
-# from __future__ import (absolute_import, division,
-#                         print_function, unicode_literals)
+from __future__ import (absolute_import, division,
+                        print_function, unicode_literals)
 
 from flask_restful import Api, Resource, reqparse
 from flask import Flask, send_from_directory
@@ -44,14 +44,12 @@ models['speech']['denseCNN1'] = torch.load('models/speech/denseCNN2_c1_out_chann
 models['speech']['sparseCNN1'] = torch.load('models/speech/sparseCNN2_n1000.pt', map_location=device)
 
 
-def getMnistClassificationResults(data, modelType, target):
+def getMnistClassificationResults(data, target):
     result = {}
     with torch.no_grad():
-        for name in models[modelType]:
-            model = models[modelType][name]
+        for name in models['mnist']:
+            model = models['mnist'][name]
             data, target = data.to(device), target.to(device)
-            data = data.double()
-            print(data.dtype)
             output = model(data)
             test_loss = F.nll_loss(output, target, reduction='sum').item()
             pred = output.max(1, keepdim=True)[1]
@@ -62,11 +60,11 @@ def getMnistClassificationResults(data, modelType, target):
     return result
 
 
-def getSpeechClassificationResults(data, modelType, target):
+def getSpeechClassificationResults(data, target):
     result = {}
     with torch.no_grad():
-        for name in models[modelType]:
-            model = models[modelType][name]
+        for name in models['speech']:
+            model = models['speech'][name]
             model.eval()
             test_loss = 0
             correct = 0
@@ -155,7 +153,7 @@ class Mnist(Resource):
         response = {
             "data": example_data.data.cpu().numpy().tolist(),
             "targets": example_targets.data.cpu().numpy().tolist(),
-            "classifications": getMnistClassificationResults(example_data, self.NAME, example_targets),
+            "classifications": getMnistClassificationResults(example_data, example_targets),
         }
         return response, 200
 
@@ -215,7 +213,7 @@ class Speech(Resource):
             "targets": targets.data.cpu().numpy().tolist(),
             "paths": result['path'],
             # FIXME: this doesn't work yet
-            "classifications": getSpeechClassificationResults(data, self.NAME, targets),
+            # "classifications": getSpeechClassificationResults(data, targets),
         }
         return response, 200
 
