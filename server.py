@@ -49,11 +49,12 @@ models['speech']['denseCNN1'] = torch.load('models/speech/denseCNN2_c1_out_chann
 models['speech']['sparseCNN1'] = torch.load('models/speech/sparseCNN2_n1000.pt', map_location=device)
 
 
-def getMnistClassificationResults(data, target):
+def getMnistClassificationResults(dataIn, target):
     result = {}
     with torch.no_grad():
         for name in models['mnist']:
             model = models['mnist'][name]
+            data = dataIn.clone()
             data, target = data.to(device), target.to(device)
             output = model(data)
             pred = output.max(1, keepdim=True)[1]
@@ -64,13 +65,15 @@ def getMnistClassificationResults(data, target):
     return result
 
 
-def getSpeechClassificationResults(data, target):
+def getSpeechClassificationResults(dataIn, target):
     result = {}
     with torch.no_grad():
         for name in models['speech']:
             model = models['speech'][name]
+            data = dataIn.clone()
             data = torch.unsqueeze(data, 1)
             data, target = data.to(device), target.to(device)
+            print("Running data shape {} through {}...".format(data.shape, name))
             output = model(data)
             pred = output.max(1, keepdim=True)[1]
             correct = pred.eq(target.view_as(pred)).sum().item()

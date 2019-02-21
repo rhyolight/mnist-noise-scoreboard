@@ -33,6 +33,11 @@ div {
     opacity: 0.2
 }
 
+.mel.overlay {
+    width: 32px;
+    height: 32px;
+}
+
 .overlay.correct {
     background-color: limegreen;
 }

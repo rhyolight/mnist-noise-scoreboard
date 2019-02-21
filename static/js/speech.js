@@ -16,6 +16,21 @@ $(function() {
 
     // Functions
 
+    /* From http://stackoverflow.com/questions/7128675/from-green-to-red-color-depend-on-percentage */
+    function getGreenToRed(percent){
+        var r, g;
+        percent = 100 - percent;
+        r = percent < 50 ? 255 : Math.floor(255-(percent*2-100)*255/100);
+        g = percent > 50 ? 255 : Math.floor((percent*2)*255/100);
+        return rgbToHex(r, g, 0);
+    }
+
+    /* From http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb */
+    function rgbToHex(r, g, b) {
+        return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+
+
     function drawMelSpectrogram(mel, $canvas) {
        let canvas = $canvas[0]
        let context = canvas.getContext('2d')
@@ -48,7 +63,7 @@ $(function() {
     function renderSpeech(resp) {
         results = resp
         // clearModelHighlight()
-        // hideDigitDetail()
+        // hideMelDetail()
         $canvasBag.html('')
         $noiseLabel.html($noiseSlider.val())
         resp.data.forEach((mel, i) => {
@@ -63,16 +78,16 @@ $(function() {
             $canvasBag.append($canvas)
             drawMelSpectrogram(mel, $canvas)
         })
-        // let models = Object.keys(resp.classifications)
-        // Object.keys(resp.classifications).forEach(c => {
-        //     let results = resp.classifications[c]
-        //     let accuracy = Math.round(results.accuracy * 100)
-        //     $('#' + c + '-score').html(accuracy + ' %')
-        //     $('#' + c + '-progress').css({
-        //       'width': accuracy + '%',
-        //       'background-color': '#' + getGreenToRed(100-accuracy),
-        //     })
-        // })
+        let models = Object.keys(resp.classifications)
+        Object.keys(resp.classifications).forEach(c => {
+            let results = resp.classifications[c]
+            let accuracy = Math.round(results.accuracy * 100)
+            $('#' + c + '-score').html(accuracy + ' %')
+            $('#' + c + '-progress').css({
+              'width': accuracy + '%',
+              'background-color': '#' + getGreenToRed(100-accuracy),
+            })
+        })
         // Handle mel interaction
         $('canvas').click(evt => {
             let melIndex = $(evt.currentTarget).attr('id').split('-').pop()
@@ -131,35 +146,35 @@ $(function() {
        $('#mel-detail').remove()
    }
 
-//    function clearModelHighlight() {
-//        $('.overlay').remove()
-//        $('.model').removeClass('highlight')
-//    }
-//
-//    function highlightModel(model) {
-//      hideDigitDetail()
-//      let modelResults = results.classifications[model].classifications
-//      $('#' + model).addClass('highlight')
-//      results.targets.forEach((target, i) => {
-//          let modelGuess = modelResults[i]
-//          let $c = $('#digit-' + i)
-//          let $o = $('<div>').addClass('overlay')
-//          if (target == modelGuess) {
-//              $o.addClass('correct')
-//          } else {
-//              $o.addClass('incorrect')
-//          }
-//          let topLeft = getOffset($c.get(0))
-//          $o.css({top: topLeft.top, left: topLeft.left})
-//          // Handle digit interaction
-//          $o.click(evt => {
-//              hideDigitDetail()
-//              showDigitDetail(i)
-//          })
-//          $('body').append($o)
-//          $o.show()
-//      })
-//    }
+   function clearModelHighlight() {
+       $('.overlay').remove()
+       $('.model').removeClass('highlight')
+   }
+
+   function highlightModel(model) {
+     hideMelDetail()
+     let modelResults = results.classifications[model].classifications
+     $('#' + model).addClass('highlight')
+     results.targets.forEach((target, i) => {
+         let modelGuess = modelResults[i]
+         let $c = $('#mel-' + i)
+         let $o = $('<div>').addClass('overlay').addClass('mel')
+         if (target == modelGuess) {
+             $o.addClass('correct')
+         } else {
+             $o.addClass('incorrect')
+         }
+         let topLeft = getOffset($c.get(0))
+         $o.css({top: topLeft.top, left: topLeft.left})
+         // Handle mel interaction
+         $o.click(evt => {
+             hideMelDetail()
+             showMelDetail(i)
+         })
+         $('body').append($o)
+         $o.show()
+     })
+   }
 
    let startingNoise = 0
    let communicating = false
@@ -187,13 +202,13 @@ $(function() {
 //        $.getJSON("/_mnist/" + batch + "/" + xform + "/" + val, renderMnist);
 //    })
 
-//    // Handle Model interaction
-//    $('.model').hover(evt => {
-//        let model = $(evt.currentTarget).attr('id')
-//        clearModelHighlight()
-//        hideDigitDetail()
-//        highlightModel(model)
-//    })
+   // Handle Model interaction
+   $('.model').hover(evt => {
+       let model = $(evt.currentTarget).attr('id')
+       clearModelHighlight()
+       hideMelDetail()
+       highlightModel(model)
+   })
 
     // Program start
     let batch = 300
