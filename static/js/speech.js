@@ -10,24 +10,7 @@ $(function() {
    let $noiseSlider = $('#noise')
    let $noiseLabel = $('#noise-label')
    let $noiseEnabled = $('#noise-enabled')
-//    let $gridSlider = $('#grid')
-//    let $gridLabel = $('#grid-label')
-//    let $gridEnabled = $('#grid-enabled')
-//    let $wipeSlider = $('#wipe')
-//    let $wipeLabel = $('#wipe-label')
-//    let $wipeEnabled = $('#wipe-enabled')
-//    let $invertLabel = $('#invert-label')
-//    let $invertEnabled = $('#invert-enabled')
-//    let $washoutSlider = $('#washout')
-//    let $washoutLabel = $('#washout-label')
-//    let $washoutEnabled = $('#washout-enabled')
-//    let $swirlSlider = $('#swirl')
-//    let $swirlLabel = $('#swirl-label')
-//    let $swirlEnabled = $('#swirl-enabled')
-//    let $rotateSlider = $('#rotate')
-//    let $rotateLabel = $('#rotate-label')
-//    let $rotateEnabled = $('#rotate-enabled')
-//
+
     // last classification results
     let results
 
@@ -37,9 +20,6 @@ $(function() {
        let canvas = $canvas[0]
        let context = canvas.getContext('2d')
        var imageData = context.getImageData(0, 0, width, height);
-       // let redScale = d3.scaleLinear([-80, 0], [0, 255])
-       // let greenScale = d3.scaleLinear([-80, 0], [255, 0])
-       // let blueScale = d3.scaleLinear([-80, 0], [50, 100])
        let greyScale = d3.scaleLinear([-80, 0], [0, 255])
        mel.forEach((slice, s_i) => {
            slice.forEach((db, d_i) => {
@@ -64,24 +44,6 @@ $(function() {
        }
        return { top: _y, left: _x };
     }
-
-//    function inverse(array) {
-//        return array.map(i => { return 1.0 - i })
-//    }
-//
-//    /* From http://stackoverflow.com/questions/7128675/from-green-to-red-color-depend-on-percentage */
-//    function getGreenToRed(percent){
-//        var r, g;
-//        percent = 100 - percent;
-//        r = percent < 50 ? 255 : Math.floor(255-(percent*2-100)*255/100);
-//        g = percent > 50 ? 255 : Math.floor((percent*2)*255/100);
-//        return rgbToHex(r, g, 0);
-//    }
-//
-//    /* From http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb */
-//    function rgbToHex(r, g, b) {
-//        return ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-//    }
 
     function renderSpeech(resp) {
         results = resp
@@ -212,56 +174,6 @@ $(function() {
        }
    })
 
-//    // Handle Grid Size interaction
-//    $gridLabel.html(2)
-//    $gridSlider.val(2)
-//    $gridSlider.change((evt) => {
-//        if ($gridEnabled.is(':checked')) {
-//            $spinner.show()
-//            $.getJSON("/_mnist/" + batch + "/grid/" + $gridSlider.val(), renderMnist);
-//        }
-//    })
-//
-//    // Handle Wipe interaction
-//    $wipeLabel.html(0)
-//    $wipeSlider.val(0)
-//    $wipeSlider.change((evt) => {
-//        if ($wipeEnabled.is(':checked')) {
-//            $spinner.show()
-//            $.getJSON("/_mnist/" + batch + "/wipe/" + $wipeSlider.val(), renderMnist);
-//        }
-//    })
-//
-//    // Handle washout interaction
-//    $washoutLabel.html(50)
-//    $washoutSlider.val(50)
-//    $washoutSlider.change((evt) => {
-//        if ($washoutEnabled.is(':checked')) {
-//            $spinner.show()
-//            $.getJSON("/_mnist/" + batch + "/washout/" + $washoutSlider.val(), renderMnist);
-//        }
-//    })
-//
-//    // Handle swirl interaction
-//    $swirlLabel.html(0)
-//    $swirlSlider.val(0)
-//    $swirlSlider.change((evt) => {
-//        if ($swirlEnabled.is(':checked')) {
-//            $spinner.show()
-//            $.getJSON("/_mnist/" + batch + "/swirl/" + $swirlSlider.val(), renderMnist);
-//        }
-//    })
-//
-//    // Handle rotate interaction
-//    $rotateLabel.html(0)
-//    $rotateSlider.val(0)
-//    $rotateSlider.change((evt) => {
-//        if ($rotateEnabled.is(':checked')) {
-//            $spinner.show()
-//            $.getJSON("/_mnist/" + batch + "/rotate/" + $rotateSlider.val(), renderMnist);
-//        }
-//    })
-//
 //    // Transform Activation
 //    $('input[type=radio]').change((evt) => {
 //        let $radio = $(evt.currentTarget)
@@ -274,7 +186,7 @@ $(function() {
 //        if (! val) val = 0
 //        $.getJSON("/_mnist/" + batch + "/" + xform + "/" + val, renderMnist);
 //    })
-//
+
 //    // Handle Model interaction
 //    $('.model').hover(evt => {
 //        let model = $(evt.currentTarget).attr('id')
@@ -289,7 +201,6 @@ $(function() {
     let height = 32
 
     // Kick off the first batch
-    // $.getJSON("/_mnist/" + batch + "/noise/" + startingNoise, renderMnist);
     $.getJSON(
         "/_speech/" + batch + "/noise/" + startingNoise, renderSpeech
     )

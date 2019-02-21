@@ -56,7 +56,6 @@ def getMnistClassificationResults(data, target):
             model = models['mnist'][name]
             data, target = data.to(device), target.to(device)
             output = model(data)
-            test_loss = F.nll_loss(output, target, reduction='sum').item()
             pred = output.max(1, keepdim=True)[1]
             correct = pred.eq(target.view_as(pred)).sum().item()
             result[name] = {}
@@ -70,20 +69,33 @@ def getSpeechClassificationResults(data, target):
     with torch.no_grad():
         for name in models['speech']:
             model = models['speech'][name]
-            model.eval()
-            test_loss = 0
-            correct = 0
             data = torch.unsqueeze(data, 1)
             data, target = data.to(device), target.to(device)
-            print(data.dtype)
             output = model(data)
-            test_loss += F.nll_loss(output, target, reduction='sum').item()
             pred = output.max(1, keepdim=True)[1]
-            correct += pred.eq(target.view_as(pred)).sum().item()
-
+            correct = pred.eq(target.view_as(pred)).sum().item()
             result[name] = {}
             result[name]["accuracy"] = float(correct) / len(data)
             result[name]["classifications"] = pred.cpu().numpy().tolist()
+
+
+    # with torch.no_grad():
+    #     for name in models['speech']:
+    #         model = models['speech'][name]
+    #         model.eval()
+    #         test_loss = 0
+    #         correct = 0
+    #         data = torch.unsqueeze(data, 1)
+    #         data, target = data.to(device), target.to(device)
+    #         print(data.dtype)
+    #         output = model(data)
+    #         test_loss += F.nll_loss(output, target, reduction='sum').item()
+    #         pred = output.max(1, keepdim=True)[1]
+    #         correct += pred.eq(target.view_as(pred)).sum().item()
+    #
+    #         result[name] = {}
+    #         result[name]["accuracy"] = float(correct) / len(data)
+    #         result[name]["classifications"] = pred.cpu().numpy().tolist()
     return result
 
 
@@ -229,7 +241,7 @@ class Speech(Resource):
 
         # Run One Batch
         batch_idx, result = next(enumerate(dataloader))
-        data = result['mel_spectrogram']
+        data = result['input']
         targets = result['target']
 
         # Construct and emit response
@@ -238,7 +250,7 @@ class Speech(Resource):
             "targets": targets.data.cpu().numpy().tolist(),
             "paths": result['path'],
             # FIXME: this doesn't work yet
-            # "classifications": getSpeechClassificationResults(data, targets),
+            "classifications": getSpeechClassificationResults(data, targets),
         }
         return response, 200
 
