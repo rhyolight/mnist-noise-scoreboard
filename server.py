@@ -8,9 +8,8 @@ from __future__ import (absolute_import, division,
                         print_function, unicode_literals)
 
 from flask_restful import Api, Resource, reqparse
-from flask import Flask, send_from_directory, send_file
+from flask import Flask, send_from_directory
 
-import torch.nn.functional as F
 from torchvision import datasets, transforms
 from image_transforms import *
 
@@ -19,16 +18,16 @@ from pytorch.speech_commands_dataset import (
 )
 from pytorch.audio_transforms import (ToMelSpectrogramFromSTFT,
                                       ToSTFT,
-                                      ChangeAmplitude,
-                                      ChangeSpeedAndPitchAudio,
                                       DeleteSTFT,
                                       LoadAudio,
                                       FixAudioLength,
+                                      AddNoise,
+                                      ToWavFile,
+                                      ChangeAmplitude,
+                                      ChangeSpeedAndPitchAudio,
                                       StretchAudioOnSTFT,
                                       TimeshiftAudioOnSTFT,
                                       FixSTFTDimension,
-                                      AddNoise,
-                                      ToWavFile,
                                       )
 from pytorch.audio_transforms import ToTensor as ToAudioTensor
 
@@ -44,9 +43,9 @@ models['mnist']['denseCNN1'] = torch.load('models/mnist/denseCNN1.pt', map_locat
 models['mnist']['sparseCNN1'] = torch.load('models/mnist/sparseCNN1.pt', map_location=device)
 print('Loading Speech models...')
 models['speech'] = {}
-models['speech']['denseCNN1'] = torch.load('models/speech/denseCNN2_c1_out_channels64_64k1000n1000.pt',
+models['speech']['denseCNN1'] = torch.load('models/speech/denseCNN2/dropout0.50/model_0.pt',
                                            map_location=device)
-models['speech']['sparseCNN1'] = torch.load('models/speech/sparseCNN2_n1000.pt', map_location=device)
+models['speech']['sparseCNN1'] = torch.load('models/speech/sparseCNN2/model_0.pt', map_location=device)
 
 
 def getMnistClassificationResults(dataIn, target):
