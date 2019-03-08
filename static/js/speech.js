@@ -189,18 +189,18 @@ $(function() {
        }
    })
 
-//    // Transform Activation
-//    $('input[type=radio]').change((evt) => {
-//        let $radio = $(evt.currentTarget)
-//        let xform = $radio.attr('id').split('-').shift()
-//        let $slider = $('#' + xform)
-//        $('input[type=radio]').prop('checked', false)
-//        $('#' + xform + '-enabled').prop('checked', true)
-//        $spinner.show()
-//        let val = $slider.val()
-//        if (! val) val = 0
-//        $.getJSON("/_mnist/" + batch + "/" + xform + "/" + val, renderMnist);
-//    })
+   // Transform Activation
+   $('input[type=radio]').change((evt) => {
+       let $radio = $(evt.currentTarget)
+       let xform = $radio.attr('id').split('-').shift()
+       let $slider = $('#' + xform)
+       $('input[type=radio]').prop('checked', false)
+       $('#' + xform + '-enabled').prop('checked', true)
+       $spinner.show()
+       let val = $slider.val()
+       if (! val) val = 0
+       $.getJSON("/_speech/" + batch + "/" + xform + "/" + val, renderSpeech);
+   })
 
    // Handle Model interaction
    $('.model').hover(evt => {

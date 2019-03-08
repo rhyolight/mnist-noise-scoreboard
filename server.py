@@ -23,6 +23,7 @@ from pytorch.audio_transforms import (ToMelSpectrogramFromSTFT,
                                       FixAudioLength,
                                       AddNoise,
                                       ToWavFile,
+                                      AddBackgroundNoiseOnSTFT,
                                       ChangeAmplitude,
                                       ChangeSpeedAndPitchAudio,
                                       StretchAudioOnSTFT,
@@ -33,6 +34,7 @@ from pytorch.audio_transforms import ToTensor as ToAudioTensor
 
 SPEECH_DATA = os.path.join("data", "speech", "speech_commands", "valid")
 SPEECH_TMP = os.path.join("data", "speech", "tmp")
+BACKGROUND_NOISE_DIR = 'data/speech/speech_commands/_background_noise_'
 
 # ML models
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -77,44 +79,36 @@ def getSpeechClassificationResults(dataIn, target):
             result[name] = {}
             result[name]["accuracy"] = float(correct) / len(data)
             result[name]["classifications"] = pred.cpu().numpy().tolist()
-
-
-    # with torch.no_grad():
-    #     for name in models['speech']:
-    #         model = models['speech'][name]
-    #         model.eval()
-    #         test_loss = 0
-    #         correct = 0
-    #         data = torch.unsqueeze(data, 1)
-    #         data, target = data.to(device), target.to(device)
-    #         print(data.dtype)
-    #         output = model(data)
-    #         test_loss += F.nll_loss(output, target, reduction='sum').item()
-    #         pred = output.max(1, keepdim=True)[1]
-    #         correct += pred.eq(target.view_as(pred)).sum().item()
-    #
-    #         result[name] = {}
-    #         result[name]["accuracy"] = float(correct) / len(data)
-    #         result[name]["classifications"] = pred.cpu().numpy().tolist()
     return result
 
 
-def createAudioXform(xform, xformStrength):
-
+def createPreStftXforms(xform, xformStrength):
     myXforms = [
         FixAudioLength(),
     ]
     if xform == "noise":
         myXforms.append(AddNoise(alpha=xformStrength / 100.))
-
-    # ChangeAmplitude(),
-    # ChangeSpeedAndPitchAudio(),
-    # StretchAudioOnSTFT(),
-    # TimeshiftAudioOnSTFT(),
-    # FixSTFTDimension(),
-
-    myXforms.append(ToSTFT())
     return transforms.Compose(myXforms)
+
+
+# ChangeAmplitude(),
+# ChangeSpeedAndPitchAudio(),
+# StretchAudioOnSTFT(),
+# TimeshiftAudioOnSTFT(),
+# FixSTFTDimension(),
+
+
+def createPostStftXforms(xform, xformStrength):
+    myXforms = [
+    ]
+    if xform == "bgNoise":
+        bg_dataset = BackgroundNoiseDataset(
+            BACKGROUND_NOISE_DIR,
+            transforms.Compose([FixAudioLength(), ToSTFT()]),
+        )
+        myXforms.append(AddBackgroundNoiseOnSTFT(bg_dataset, max_percentage=1.0))
+    return transforms.Compose(myXforms)
+
 
 
 # Web App:
@@ -209,28 +203,20 @@ api.add_resource(Mnist, "/_mnist/<int:batch>/<string:xform>/<int:xformStrength>"
 class Speech(Resource):
     NAME = "speech"
 
-    def post(self):
-        args = parser.parse_args()
-
     def get(self, batch, xform, xformStrength):
         tempPath = SPEECH_TMP
-        dataAugmentationTransform = createAudioXform(xform, xformStrength)
-
-        n_mels = 32
-        melTransform = transforms.Compose(
-            [
-                ToMelSpectrogramFromSTFT(n_mels=n_mels),
-                DeleteSTFT(),
-                ToAudioTensor('mel_spectrogram', 'input'),
-            ])
 
         dataset = SpeechCommandsDataset(
             SPEECH_DATA,
             transforms.Compose([
                 LoadAudio(),
-                dataAugmentationTransform,
+                createPreStftXforms(xform, xformStrength),
                 ToWavFile(tempPath),
-                melTransform,
+                ToSTFT(),
+                ToMelSpectrogramFromSTFT(n_mels=32),
+                createPostStftXforms(xform, xformStrength),
+                DeleteSTFT(),
+                ToAudioTensor('mel_spectrogram', 'input'),
             ]))
 
         dataloader = torch.utils.data.DataLoader(dataset,

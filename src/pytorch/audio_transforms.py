@@ -258,9 +258,6 @@ class AddBackgroundNoiseOnSTFT(Dataset):
         self.max_percentage = max_percentage
 
     def __call__(self, data):
-        if not should_apply_transform():
-            return data
-
         noise = random.choice(self.bg_dataset)['stft']
         percentage = random.uniform(0, self.max_percentage)
         data['stft'] = data['stft'] * (1 - percentage) + noise * percentage
