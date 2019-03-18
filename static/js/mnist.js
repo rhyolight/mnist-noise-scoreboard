@@ -1,29 +1,12 @@
 $(function() {
 
+    let noise = 0
+
     // DOM stuff used below
     let $canvasBag = $('#canvas-bag')
     let $spinner = $('.spinner-border')
 
-    let $noiseSlider = $('#noise')
     let $noiseLabel = $('#noise-label')
-    let $noiseEnabled = $('#noise-enabled')
-    let $gridSlider = $('#grid')
-    let $gridLabel = $('#grid-label')
-    let $gridEnabled = $('#grid-enabled')
-    let $wipeSlider = $('#wipe')
-    let $wipeLabel = $('#wipe-label')
-    let $wipeEnabled = $('#wipe-enabled')
-    let $invertLabel = $('#invert-label')
-    let $invertEnabled = $('#invert-enabled')
-    let $washoutSlider = $('#washout')
-    let $washoutLabel = $('#washout-label')
-    let $washoutEnabled = $('#washout-enabled')
-    let $swirlSlider = $('#swirl')
-    let $swirlLabel = $('#swirl-label')
-    let $swirlEnabled = $('#swirl-enabled')
-    let $rotateSlider = $('#rotate')
-    let $rotateLabel = $('#rotate-label')
-    let $rotateEnabled = $('#rotate-enabled')
 
     // last classification results
     let results
@@ -77,12 +60,7 @@ $(function() {
         clearModelHighlight()
         hideDigitDetail()
         $canvasBag.html('')
-        $noiseLabel.html($noiseSlider.val())
-        $gridLabel.html($gridSlider.val())
-        $wipeLabel.html($wipeSlider.val())
-        $washoutLabel.html($washoutSlider.val())
-        $swirlLabel.html($swirlSlider.val())
-        $rotateLabel.html($rotateSlider.val())
+        $noiseLabel.html(noise)
         let models = Object.keys(resp.classifications)
         resp.data.forEach((digit, i) => {
             let $canvas = $('<canvas>')
@@ -115,6 +93,9 @@ $(function() {
             hideDigitDetail()
             showDigitDetail(digitIndex)
         })
+        clearModelHighlight()
+        hideDigitDetail()
+        highlightModel(models[0])
         $spinner.hide()
     }
 
@@ -188,90 +169,19 @@ $(function() {
     let width = 28
     let height = 28
     let batch = 400
-    let startingNoise = 0
-    let communicating = false
 
     // Handle noise interaction
-    $noiseLabel.html(startingNoise)
-    $noiseSlider.val(startingNoise)
-    $noiseSlider.change((evt) => {
-        if ($noiseEnabled.is(':checked')) {
-            $spinner.show()
-            $.getJSON("/_mnist/" + batch + "/noise/" + $noiseSlider.val(), renderMnist);
-        }
-    })
+    $noiseLabel.html(noise)
 
-    // Handle Grid Size interaction
-    $gridLabel.html(2)
-    $gridSlider.val(2)
-    $gridSlider.change((evt) => {
-        if ($gridEnabled.is(':checked')) {
-            $spinner.show()
-            $.getJSON("/_mnist/" + batch + "/grid/" + $gridSlider.val(), renderMnist);
-        }
-    })
-
-    // Handle Wipe interaction
-    $wipeLabel.html(0)
-    $wipeSlider.val(0)
-    $wipeSlider.change((evt) => {
-        if ($wipeEnabled.is(':checked')) {
-            $spinner.show()
-            $.getJSON("/_mnist/" + batch + "/wipe/" + $wipeSlider.val(), renderMnist);
-        }
-    })
-
-    // Handle washout interaction
-    $washoutLabel.html(50)
-    $washoutSlider.val(50)
-    $washoutSlider.change((evt) => {
-        if ($washoutEnabled.is(':checked')) {
-            $spinner.show()
-            $.getJSON("/_mnist/" + batch + "/washout/" + $washoutSlider.val(), renderMnist);
-        }
-    })
-
-    // Handle swirl interaction
-    $swirlLabel.html(0)
-    $swirlSlider.val(0)
-    $swirlSlider.change((evt) => {
-        if ($swirlEnabled.is(':checked')) {
-            $spinner.show()
-            $.getJSON("/_mnist/" + batch + "/swirl/" + $swirlSlider.val(), renderMnist);
-        }
-    })
-
-    // Handle rotate interaction
-    $rotateLabel.html(0)
-    $rotateSlider.val(0)
-    $rotateSlider.change((evt) => {
-        if ($rotateEnabled.is(':checked')) {
-            $spinner.show()
-            $.getJSON("/_mnist/" + batch + "/rotate/" + $rotateSlider.val(), renderMnist);
-        }
-    })
-
-    // Transform Activation
-    $('input[type=radio]').change((evt) => {
-        let $radio = $(evt.currentTarget)
-        let xform = $radio.attr('id').split('-').shift()
-        let $slider = $('#' + xform)
-        $('input[type=radio]').prop('checked', false)
-        $('#' + xform + '-enabled').prop('checked', true)
-        $spinner.show()
-        let val = $slider.val()
-        if (! val) val = 0
-        $.getJSON("/_mnist/" + batch + "/" + xform + "/" + val, renderMnist);
-    })
-
-    // Handle Model interaction
-    $('.model').hover(evt => {
-        let model = $(evt.currentTarget).attr('id')
-        clearModelHighlight()
-        hideDigitDetail()
-        highlightModel(model)
-    })
+    function step(newNoise) {
+        noise = newNoise
+        $.getJSON("/_mnist/" + batch + "/noise/" + noise, (resp) => {
+            renderMnist(resp)
+            step(++noise)
+        });
+    }
 
     // Kick off the first batch
-    $.getJSON("/_mnist/" + batch + "/noise/" + startingNoise, renderMnist);
+    step(noise)
+
 })

@@ -13,6 +13,8 @@ from flask import Flask, send_from_directory
 from torchvision import datasets, transforms
 from image_transforms import *
 
+from torch.utils.data import SequentialSampler
+
 from pytorch.speech_commands_dataset import (
     SpeechCommandsDataset, BackgroundNoiseDataset
 )
@@ -192,8 +194,11 @@ class Mnist(Resource):
                                      ]
                                  ),
                                  )
-        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch, shuffle=True)
-        batch_idx, (example_data, example_targets) = next(enumerate(dataloader))
+        dataloader = torch.utils.data.DataLoader(
+            dataset, batch_size=batch,
+            sampler=SequentialSampler(dataset),
+        )
+        batch_idx, (example_data, example_targets) = next(enumerate(dataloader, 0))
 
         response = {
             "data": example_data.data.cpu().numpy().tolist(),
