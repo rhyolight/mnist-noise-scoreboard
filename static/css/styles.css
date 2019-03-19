@@ -7,7 +7,7 @@ canvas {
   border: none;
 }
 
-#canvas-bag {
+.canvas-bag {
   width: 700px;
   line-height: 0.1;
 }

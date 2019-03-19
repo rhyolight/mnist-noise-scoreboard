@@ -39,8 +39,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 models = {}
 models['mnist'] = {}
 print('Loading MNIST models...')
-models['mnist']['denseCNN1'] = torch.load('models/mnist/denseCNN1.pt', map_location=device)
-models['mnist']['sparseCNN1'] = torch.load('models/mnist/sparseCNN1.pt', map_location=device)
+models['mnist']['dense'] = torch.load('models/mnist/denseCNN1.pt', map_location=device)
+models['mnist']['sparse'] = torch.load('models/mnist/sparseCNN1.pt', map_location=device)
 print('Loading Speech models...')
 models['speech'] = {}
 models['speech']['denseCNN1'] = torch.load('models/speech/denseCNN2/dropout0.50/model_0.pt',
