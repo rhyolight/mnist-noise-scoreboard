@@ -60,7 +60,7 @@ $(function() {
         clearModelHighlight()
         hideDigitDetail()
         $canvasBag.html('')
-        $noiseLabel.html(noise)
+        $noiseLabel.html(noise + ' %')
         let models = Object.keys(resp.classifications)
         resp.data.forEach((digit, i) => {
             let $canvas = $('<canvas>')

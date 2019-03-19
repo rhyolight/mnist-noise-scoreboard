@@ -18,20 +18,20 @@ from torch.utils.data import SequentialSampler
 from pytorch.speech_commands_dataset import (
     SpeechCommandsDataset, BackgroundNoiseDataset
 )
-from pytorch.audio_transforms import (ToMelSpectrogramFromSTFT,
-                                      ToSTFT,
-                                      DeleteSTFT,
-                                      LoadAudio,
-                                      FixAudioLength,
-                                      AddNoise,
-                                      ToWavFile,
-                                      ChangeAmplitude,
-                                      ChangeSpeedAndPitchAudio,
-                                      StretchAudioOnSTFT,
-                                      TimeshiftAudioOnSTFT,
-                                      FixSTFTDimension,
-                                      )
-from pytorch.audio_transforms import ToTensor as ToAudioTensor
+# from pytorch.audio_transforms import (ToMelSpectrogramFromSTFT,
+#                                       ToSTFT,
+#                                       DeleteSTFT,
+#                                       LoadAudio,
+#                                       FixAudioLength,
+#                                       AddNoise,
+#                                       ToWavFile,
+#                                       ChangeAmplitude,
+#                                       ChangeSpeedAndPitchAudio,
+#                                       StretchAudioOnSTFT,
+#                                       TimeshiftAudioOnSTFT,
+#                                       FixSTFTDimension,
+#                                       )
+# from pytorch.audio_transforms import ToTensor as ToAudioTensor
 
 SPEECH_DATA = os.path.join("data", "speech", "speech_commands", "valid")
 SPEECH_TMP = os.path.join("data", "speech", "tmp")
@@ -41,7 +41,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 models = {}
 models['mnist'] = {}
 print('Loading MNIST models...')
-models['mnist']['denseCNN1'] = torch.load('models/mnist/denseCNN1.pt', map_location=device)
+# models['mnist']['denseCNN1'] = torch.load('models/mnist/denseCNN1.pt', map_location=device)
 models['mnist']['sparseCNN1'] = torch.load('models/mnist/sparseCNN1.pt', map_location=device)
 print('Loading Speech models...')
 models['speech'] = {}
