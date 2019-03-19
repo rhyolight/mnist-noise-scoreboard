@@ -15,26 +15,28 @@
 
   </head>
   <body>
-
-    <h1>Noisy MNIST SparseNet Demo</h1>
-
     <div class="container">
 
       <div class="row">
-
         <div class="col-8">
           <div class="spinner-border" style="width: 13rem; height: 13rem;" role="status">
             <span class="sr-only">Loading...</span>
           </div>
           <div id="dense-canvas-bag" class="canvas-bag"></div>
-
           <br/>
-
         </div>
 
         <div class="col-4">
 
           <div class="container">
+
+            <div class="row">
+              <div class="col model" id="sparseCNN1">
+                <h2>Noise</h2>
+                <h4 id="noise-label"></h4>
+              </div>
+            </div>
+
 
             <div class="row">
               <div class="col model" id="denseCNN1">
