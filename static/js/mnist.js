@@ -177,7 +177,10 @@ $(function() {
         noise = newNoise
         $.getJSON("/_mnist/" + batch + "/noise/" + noise, (resp) => {
             renderMnist(resp)
-            step(++noise)
+            noise++
+            if (noise <= 100) {
+                step(noise)
+            }
         });
     }
 
