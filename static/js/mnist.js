@@ -1,31 +1,15 @@
 $(function() {
 
-    // DOM stuff used below
-    let $spinner = $('.spinner-border')
-
-    let $noiseSlider = $('#noise')
-    let $noiseLabel = $('#noise-label')
-    let $noiseEnabled = $('#noise-enabled')
-    let $gridSlider = $('#grid')
-    let $gridLabel = $('#grid-label')
-    let $gridEnabled = $('#grid-enabled')
-    let $wipeSlider = $('#wipe')
-    let $wipeLabel = $('#wipe-label')
-    let $wipeEnabled = $('#wipe-enabled')
-    let $invertLabel = $('#invert-label')
-    let $invertEnabled = $('#invert-enabled')
-    let $washoutSlider = $('#washout')
-    let $washoutLabel = $('#washout-label')
-    let $washoutEnabled = $('#washout-enabled')
-    let $swirlSlider = $('#swirl')
-    let $swirlLabel = $('#swirl-label')
-    let $swirlEnabled = $('#swirl-enabled')
-    let $rotateSlider = $('#rotate')
-    let $rotateLabel = $('#rotate-label')
-    let $rotateEnabled = $('#rotate-enabled')
-
+    let width = 28
+    let height = 28
+    let batch = 400
+    let noise = 0
     // last classification results
     let results
+
+    // DOM stuff used below
+    let $spinner = $('.spinner-border')
+    let $noiseLabel = $('#noise-label')
 
     // Functions
 
@@ -73,32 +57,30 @@ $(function() {
 
     function renderMnist(resp) {
         results = resp
-        $noiseLabel.html($noiseSlider.val())
+        $noiseLabel.html(noise + ' %')
         let models = Object.keys(resp.classifications)
 
-        resp.data.forEach((digit, i) => {
-            let processOneModelDigit = function(name) {
-                let $canvasBag = $('#' + name + '-canvas-bag')
+        $('.overlay').remove()
+
+        models.forEach((model) => {
+            let $canvasBag = $('#' + model + '-canvas-bag')
+            $canvasBag.html('')
+            resp.data.forEach((digit, i) => {
                 let $canvas = $('<canvas>')
-                    .attr('id', name + '-digit-' + i)
+                    .attr('id', model + '-digit-' + i)
                     .attr('width', width)
                     .attr('height', height)
                     .attr('data-index', i)
                     .attr('data-target', resp.targets[i])
                     .attr('data-index', i)
                     .addClass('mnist')
-                models.forEach(m => {
-                    let modelClassifications = results.classifications[m].classifications[i][0]
-                    $canvas.attr('data-' + m + '-classification', modelClassifications)
-                })
+                let modelClassifications = results.classifications[model].classifications[i][0]
+                $canvas.attr('data-' + model + '-classification', modelClassifications)
                 $canvasBag.append($canvas)
                 drawMnist(inverse(digit.flat(2)), $canvas, 1)
-            }
-            processOneModelDigit('sparse')
-            processOneModelDigit('dense')
+            })
+            highlightModel(model)
         })
-        highlightModel('sparse')
-        highlightModel('dense')
 
         Object.keys(resp.classifications).forEach(c => {
             let results = resp.classifications[c]
@@ -113,7 +95,6 @@ $(function() {
     }
 
     function highlightModel(model) {
-      console.log('highlighting %s', model)
       let modelResults = results.classifications[model].classifications
       results.targets.forEach((target, i) => {
           let modelGuess = modelResults[i]
@@ -132,12 +113,21 @@ $(function() {
     }
 
     // Program start
-    let width = 28
-    let height = 28
-    let batch = 400
-    let startingNoise = 0
-    let communicating = false
+
+    $noiseLabel.html(noise + ' %')
+
+    function step(newNoise) {
+        noise = newNoise
+        $.getJSON("/_mnist/" + batch + "/noise/" + noise, (resp) => {
+            renderMnist(resp)
+            noise++
+            if (noise <= 100) {
+                step(noise)
+            }
+        });
+    }
 
     // Kick off the first batch
-    $.getJSON("/_mnist/" + batch + "/noise/" + startingNoise, renderMnist);
+    step(noise)
+
 })
